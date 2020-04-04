@@ -1,0 +1,32 @@
+Use Enter Key to determine when command finishes
+
+Read Character line by line
+
+Maybe save whole command into single variable which you can process later?
+	- Might use backspace so it would 'pop' the last character in character array
+
+
+
+What I can't Use:
+
+scanf, fscanf, printf, fprintf, cin, cout, or their derivatives (?)
+
+
+MUST USE READ/WRITE system calls
+
+Params to write(int fildes, const void* buf, size_t nbyte):
+
+	fildes = file destination, use STDIN_FILENO
+	buf = our output string, provide address of variable to print
+	nbyte = size of buf. If you pass string, use string.length or .size
+
+
+Extra Credit Due April 6th, 2020:
+
+1. Must take user input (DONE)
+2. Change Directories with cd
+3. Output current directoy
+4. Handle Exit Command
+5. UP/DOWN arrow keys should work (DONE)
+6. All other commands should output the command followed by each arg seperated
+   by a single space.
