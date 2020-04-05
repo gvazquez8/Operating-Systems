@@ -1,0 +1,63 @@
+---------------ECS 150 Project 1 Extra Credit Submission------------------------
+-------------------By: Gabriel Vazquez (917307919)------------------------------
+
+Files Included:
+	README
+	Makefile
+	noncanmode.cpp
+
+----------------------------INSTRUCTIONS----------------------------------------
+
+1. Extract ashell.tgz
+
+2. Run the command "make"
+3. Execute program with "./ashell"
+
+------------------------Project Functionality-----------------------------------
+
+Currently, there are select few of commands that are supported.
+
+These are:
+	1. pwd - print current directory
+	2. cd [DIRECTORY] - changes directory to DIRECTORY. If DIRECTORY is not
+		provided, change to directory specified by the HOME environment
+		variable.
+
+		args for cd:
+			1. cd .. - go up a directory in path / leave current directory
+			2. cd / - go to root directory
+			3. cd \ - go to directory specified by HOME env variable.
+			4. cd [DIRECTORY] - change directory to DIRECTORY, must be a
+				relative path
+			5. cd /[DIRECTORY] - change directory to DIRECTORY, must be absolute
+				path
+
+		ERRORS:
+			If DIRECTORY is specified, but unable to change directories to it,
+			then a "No such directory" error printed.
+	3. exit - close application
+
+Unimplemented commands do not perform their intended action, but rather output
+the command plus arguments to console.
+
+This shell also supports command history (10 items) which the user can navigate
+with the UP and DOWN arrow keys. Audible bell will occur if trying to access
+beyond the history. In addition, users can use the BACKSPACE and DEL keys to
+remove characters from current line.
+
+When taking input from user, shell will print out the current directory followed
+by the % sign to signal the current directory. If path is > 16 characters then
+the path is written as /.../[LAST DIRECTORY IN PATH].
+
+LIMATATIONS:
+
+	Piping and Input redirection have not been implemented.
+	Commands 'ff' and 'ls' have not been implemented.
+
+----------------------------REFERENCES------------------------------------------
+
+1. http://www.cplusplus.com/reference/string/string/
+2. http://www.cplusplus.com/reference/deque/
+3. http://www.cplusplus.com/reference/vector/
+4. https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+5. https://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html

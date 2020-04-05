@@ -60,15 +60,26 @@ void handleChangeDirectory(std::vector<std::string>* args) {
     }
     else {
         std::string newDir = args->at(1);
-
-        if (newDir.length() == 1) {
-            // if (newDir == ".") {
-            //     return;
-            // } else if (newDir == "\\") {
-            //     chdir(getenv("HOME"));
-            // } else if (newDir == "")
+        if (newDir == ".") {
+            return;
+        } else if (newDir == "/") {
+            chdir("/");
+        } else if (newDir == "\\") {
+            chdir(getenv("HOME"));
+        } else if (newDir == "..") {
+            std::string currDir = std::string(get_current_dir_name());
+            std::size_t pos = currDir.find_last_of("/\\");
+            chdir(currDir.substr(0, pos+1).c_str());
+        } else {
+            std::string currDir =  std::string(get_current_dir_name());
+            chdir(newDir.c_str());
+            if (currDir == std::string(get_current_dir_name())) {
+                std::string err = "Error: No such directory found\n";
+                write(STDIN_FILENO, err.c_str(), err.length());
+            }
         }
     }
+    return;
 }
 
 void executeBell() {
@@ -122,7 +133,7 @@ std::string getNewLine(int* endProg, std::deque<std::string>* history) {
                         }
                         historyIndex++;
                         command = history->at(historyIndex);
-                        std::string clear = "\33[2K\r";
+                        std::string clear = "\33[2K\r"; // clear line and reset
                         write(STDIN_FILENO, clear.c_str(), clear.length());
                         printCurrentDirectory();
                         write(STDIN_FILENO, command.c_str(), command.length());
@@ -171,20 +182,21 @@ void parseCommand(std::string userInput, std::vector<std::string>* args) {
 
     std::size_t pos = 0;
 
-    if (userInput == "") {
-        args->push_back("");
-    }
-
     while (!userInput.empty()) {
         pos = userInput.find(" ");
         if (pos != std::string::npos) {
-            args->push_back(userInput.substr(0, pos));
-            userInput.erase(0, pos+1);
+            std::string partialArg = userInput.substr(0, pos);
+            if (partialArg.compare("")) {
+                args->push_back(partialArg);
+            }
+            userInput.erase(userInput.begin(), userInput.begin()+pos+1);
         } else {
             args->push_back(userInput);
             return;
         }
     }
+
+    return;
 }
 // TODO: Execute commands: cd, ls, pwd, ff, exit
 // TODO: Add flags to commands
@@ -195,6 +207,10 @@ void execCommand(std::string input, int* endProg) {
     std::vector<std::string> args;
     parseCommand(input, &args);
 
+    if (args.empty()) { // if any commands were inputted
+        return;
+    }
+
     if (args[0] == "pwd") { // Print Working Directory
         handlepwd();
     } else if (args[0] == "cd") { // Change Directory
@@ -204,6 +220,8 @@ void execCommand(std::string input, int* endProg) {
     } else if (args[0] == "") { // Do nothing
         return;
     } else { // If command not supported, echo out command
+        std::string prefix = "Command: ";
+        write(STDIN_FILENO, prefix.c_str(), prefix.length());
         for (int i = 0; i < args.size(); i++) {
             write(STDIN_FILENO, args[i].c_str(), args[i].length());
             write(STDIN_FILENO, " ", 1);
