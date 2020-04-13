@@ -7,6 +7,9 @@
 #include <string>
 #include <deque>
 #include <vector>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 void ResetCanonicalMode(int fd, struct termios *savedattributes){
     tcsetattr(fd, TCSANOW, savedattributes);
@@ -33,6 +36,11 @@ void SetNonCanonicalMode(int fd, struct termios *savedattributes){
     tcsetattr(fd, TCSAFLUSH, &TermAttributes);
 }
 
+void executeBell() {
+    int bell = 0x07;
+    write(STDIN_FILENO, &bell, 1);
+}
+
 void printCurrentDirectory() {
     std::string dir = std::string(get_current_dir_name());
 
@@ -47,7 +55,7 @@ void printCurrentDirectory() {
     }
 }
 
-void handlepwd() {
+void handlePrintCurrentDirectory() {
     std::string dir = std::string(get_current_dir_name());
 
     write(STDIN_FILENO, dir.c_str(), dir.length());
@@ -82,11 +90,35 @@ void handleChangeDirectory(std::vector<std::string>* args) {
     return;
 }
 
-void executeBell() {
-    int bell = 0x07;
-    write(STDIN_FILENO, &bell, 1);
-}
+void handleList(std::vector<std::string>* args) {
+    struct dirent* pDirent;
+    struct stat fileStat;
+    if (args->size() == 1) {
+        const char* path = get_current_dir_name();
+        DIR* dir = opendir(path);
+        if (dir == NULL) {
+            std::string err = "Cannot open directory";
+            write(STDIN_FILENO, err.c_str(), err.size());
+        }
+        while ((pDirent = readdir(dir)) != NULL) {
+            std::string filePath = std::string(path) + "/" + pDirent->d_name;
+            int good = stat(filePath.c_str(), &fileStat);
+            printf( (S_ISDIR(fileStat.st_mode)) ? "d" : "-");
+            printf( (fileStat.st_mode & S_IRUSR) ? "r" : "-");
+            printf( (fileStat.st_mode & S_IWUSR) ? "w" : "-");
+            printf( (fileStat.st_mode & S_IXUSR) ? "x" : "-");
+            printf( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
+            printf( (fileStat.st_mode & S_IWGRP) ? "w" : "-");
+            printf( (fileStat.st_mode & S_IXGRP) ? "x" : "-");
+            printf( (fileStat.st_mode & S_IROTH) ? "r" : "-");
+            printf( (fileStat.st_mode & S_IWOTH) ? "w" : "-");
+            printf( (fileStat.st_mode & S_IXOTH) ? "x" : "-");
+            printf(" %s\n", pDirent->d_name);
+        }
+    } else {
 
+    }
+}
 std::string getNewLine(int* endProg, std::deque<std::string>* history) {
     std::string command = "";
     std::string tempCpy;
@@ -198,9 +230,8 @@ void parseCommand(std::string userInput, std::vector<std::string>* args) {
 
     return;
 }
-// TODO: Execute commands: cd, ls, pwd, ff, exit
-// TODO: Add flags to commands
-void execCommand(std::string input, int* endProg) {
+
+void executeCommand(std::string input, int* endProg) {
     // args will be in the form of
     // [command, arg1, arg2, ...]
 
@@ -212,9 +243,12 @@ void execCommand(std::string input, int* endProg) {
     }
 
     if (args[0] == "pwd") { // Print Working Directory
-        handlepwd();
+        handlePrintCurrentDirectory();
     } else if (args[0] == "cd") { // Change Directory
         handleChangeDirectory(&args);
+    } else if (args[0] == "ls") { // List Directory
+        handleList(&args);
+    } else if (args[0] == "ff") {
     } else if (args[0] == "exit") { // Exit Program
         *endProg = 1;
     } else if (args[0] == "") { // Do nothing
@@ -243,26 +277,13 @@ int main(int argc, char *argv[]){
 
         printCurrentDirectory();
         std::string userInput = getNewLine(&endProg, &history);
-        execCommand(userInput, &endProg);
+        executeCommand(userInput, &endProg);
 
         while (history.size() > 10) {
             history.pop_back();
         }
 
         if (endProg) { break; }
-
-        // read(STDIN_FILENO, &RXChar, 1);
-        // if(0x04 == RXChar){ // C-d
-        //     break;
-        // }
-        // else{
-        //     if(isprint(RXChar)){
-        //         printf("RX: '%c' 0x%02X\n",RXChar, RXChar);
-        //     }
-        //     else{
-        //         printf("RX: ' ' 0x%02X\n",RXChar);
-        //     }
-        // }
     }
 
     ResetCanonicalMode(STDIN_FILENO, &SavedTermAttributes);
