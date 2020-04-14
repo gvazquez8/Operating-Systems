@@ -1,0 +1,34 @@
+TODO:
+
+	1.	Implement ls (DONE)
+	2.	Implement ff (DONE)
+	3.	Implement piping
+	4.	Implement Redirection involes dup2 (DONE) (KINDA)
+	5.	Implement Execvp (DONE)
+
+ORIGINAL CODE:
+
+read(STDIN_FILENO, &RXChar, 1);
+if(0x04 == RXChar){ // C-d
+    break;
+}
+else{
+    if(isprint(RXChar)){
+        printf("RX: '%c' 0x%02X\n",RXChar, RXChar);
+    }
+    else{
+        printf("RX: ' ' 0x%02X\n",RXChar);
+    }
+}
+
+
+fork() returns pid_t pid iD
+Use to create child process.
+
+The pipe | seems to add the argument to the end of the command after |
+
+
+{left command} | {right command} = right command + left command
+
+
+dup2
