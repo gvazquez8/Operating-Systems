@@ -168,8 +168,8 @@ extern "C" {
 		*stopUntilRef = *totalTickCountRef + tick;
 
 		while(*totalTickCountRef < *stopUntilRef) {
-			std::cout << "Total: " << *totalTickCountRef << endl;
-			std::cout << "StopUntil: " << *stopUntilRef << endl;
+			std::cout << "Total: " << *totalTickCountRef << std::endl;
+			std::cout << "StopUntil: " << *stopUntilRef << std::endl;
 		}
 
 		return VM_STATUS_SUCCESS;
