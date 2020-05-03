@@ -37,6 +37,7 @@ extern "C" {
 	}
 
 	void timerCallback(void* calldata) {
+		std::cout << "here" << std::endl;
 		totalTickCount++;
 	}
 
