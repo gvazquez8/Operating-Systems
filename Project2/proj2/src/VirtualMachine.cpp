@@ -11,7 +11,7 @@ extern "C" {
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
 	void timerCallback(void*);
-	
+
 	// Store the tickms arg that was passed when starting the program
 	int tickTimeMSArg;
 	// tickCount stores the number of ticks since start
@@ -23,11 +23,11 @@ extern "C" {
 		tickTimeMSArg = tickms;
 		MachineInitialize();
 		MachineEnableSignals();
-		
+
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
-		
+
 		VMMain(argc, argv);
 		MachineTerminate();
 		VMUnloadModule();
@@ -37,7 +37,7 @@ extern "C" {
 	void timerCallback(void* calldata) {
 		totalTickCount++;
 	}
-	
+
 	TVMStatus VMTickMS(int *tickmsref) {
 		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		*tickmsref = tickTimeMSArg;
@@ -77,12 +77,11 @@ extern "C" {
 
 	TVMStatus VMThreadSleep(TVMTick tick) {
 		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-		
+
 		TVMTick stopUntil = totalTickCount + tick;
-		std::cout << "totalTicks: " << totalTickCount << std::endl;
 		while(totalTickCount < stopUntil) {
 		}
-		
+
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -113,6 +112,6 @@ extern "C" {
 	TVMStatus VMFileSeek(int filedescriptor, int offset, int whence, int* newoffset) {
 		return VM_STATUS_SUCCESS;
 	}
-	
+
 
 }
