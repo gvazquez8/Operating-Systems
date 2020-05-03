@@ -165,7 +165,7 @@ extern "C" {
 		TVMTickRef stopUntilRef = &stopUntil;
 
 		VMTickCount(totalTickCountRef);
-		*stopUntil = *totalTickCount + tick;
+		*stopUntilRef = *totalTickCountRef + tick;
 
 		while(totalTickCount < stopUntil) {
 		}
