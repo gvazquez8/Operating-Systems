@@ -10,14 +10,13 @@ extern "C" {
 	int TickTimeMS;
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
-		std::cout << "VMStart" << std::endl;
-		TVMMainEntry VMMainReference = VMLoadModule(argv[0]);
+		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMainReference == NULL) {
 			return VM_STATUS_FAILURE;
 		}
 		MachineInitialize();
 		MachineEnableSignals();
-		VMMainReference(argc, argv);
+		VMMain(argc, argv);
 		MachineTerminate();
 		VMUnloadModule();
 		return VM_STATUS_SUCCESS;
