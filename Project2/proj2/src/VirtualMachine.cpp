@@ -41,12 +41,26 @@ extern "C" {
 	}
 
 	TVMStatus VMTickMS(int *tickmsref) {
+	/* Retrieves milliseconds between ticks of VM
+		Params:
+			tickmsref = location to put tick time interval in ms
+		Returns:
+			VM_STATUS_SUCCESS on successful retireval
+			VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
+	*/
 		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		*tickmsref = tickTimeMSArg;
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMTickCount(TVMTickRef tickref) {
+	/* Retrieves number of ticks that have occurred since start of VM
+		Params:
+			tickref = location to put ticks
+		Returns:
+			VM_STATUS_SUCCESS on success
+			VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
+	*/
 		if (tickref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		*tickref = totalTickCount;
 		return VM_STATUS_SUCCESS;
@@ -145,8 +159,10 @@ extern "C" {
 
 		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
-		TVMTick stopUntil = totalTickCount + tick;
-		while(totalTickCount < stopUntil) {
+		TVMTickRef totalTickCount = NULL;
+		VMTickCount(totalTickCount);
+		*totalTickCount += tick;
+		while(*totalTickCount < stopUntil) {
 		}
 
 		return VM_STATUS_SUCCESS;
