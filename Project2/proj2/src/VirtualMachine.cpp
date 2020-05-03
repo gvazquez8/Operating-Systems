@@ -208,7 +208,7 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 
-		if (write(filedescriptor, data, *length) != *length) {
+		if (write(fd, data, *length) != *length) {
 			return VM_STATUS_FAILURE;
 		}
 
