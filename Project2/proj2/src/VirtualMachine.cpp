@@ -159,10 +159,15 @@ extern "C" {
 
 		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
-		TVMTickRef totalTickCount = NULL;
-		VMTickCount(totalTickCount);
-		TVMTickRef stopUntil = *totalTickCount + tick;
-		while(*totalTickCount < *stopUntil) {
+		TVMTick totalTickCount = 0;
+		TVMTick stopUntil = 0;
+		TVMTickRef totalTickCountRef = &totalTickCount;
+		TVMTickRef stopUntilRef = &stopUntil;
+
+		VMTickCount(totalTickCountRef);
+		*stopUntil = *totalTickCount + tick;
+
+		while(totalTickCount < stopUntil) {
 		}
 
 		return VM_STATUS_SUCCESS;
