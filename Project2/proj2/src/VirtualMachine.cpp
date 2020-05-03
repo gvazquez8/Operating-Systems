@@ -170,6 +170,8 @@ extern "C" {
 
 		*stopUntilRef = *totalTickCountRef + tick;
 
+		std::cout << "Current Total: " << *totalTickCountRef << std::endl;
+		std::cout << "Current StopUntil: " << *stopUntilRef << std::endl;
 		while(*totalTickCountRef < *stopUntilRef) {
 		}
 
