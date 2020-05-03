@@ -3,31 +3,50 @@
 #include <iostream>
 
 extern "C" {
-
+	// Stuff for functions in headers
+	#define VM_TIMEOUT_INFINITE ((TVMTick)0)
+	#define VM_TIMEOUT_IMMEDIATE ((TVMTick)-1)
 	typedef void (*TVMMainEntry) (int, char* []);
+	typedef void (*TMachineAlarmCallback) (void* calldata);
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
-	int tickTimeMS = NULL;
+	void timerCallback(void*);
+	
+	// Store the tickms arg that was passed when starting the program
+	int tickTimeMSArg;
+	// tickCount stores the number of ticks since start
+	volatile TVMTick totalTickCount = 0;
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
-		tickTimeMS = tickms;
+		tickTimeMSArg = tickms;
 		MachineInitialize();
 		MachineEnableSignals();
+		
+		// create alarm for tick incrementing
+		useconds_t tickus = tickms * 1000;
+		MachineRequestAlarm(tickus, timerCallback, NULL);
+		
 		VMMain(argc, argv);
 		MachineTerminate();
 		VMUnloadModule();
 		return VM_STATUS_SUCCESS;
 	}
 
+	void timerCallback(void* calldata) {
+		totalTickCount++;
+	}
+	
 	TVMStatus VMTickMS(int *tickmsref) {
 		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-		*tickmsref = tickTimeMS;
+		*tickmsref = tickTimeMSArg;
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMTickCount(TVMTickRef tickref) {
+		if (tickref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		*tickref = totalTickCount;
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -57,6 +76,13 @@ extern "C" {
 	}
 
 	TVMStatus VMThreadSleep(TVMTick tick) {
+		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		
+		TVMTick stopUntil = totalTickCount + tick;
+		std::cout << "totalTicks: " << totalTickCount << std::endl;
+		while(totalTickCount < stopUntil) {
+		}
+		
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -87,5 +113,6 @@ extern "C" {
 	TVMStatus VMFileSeek(int filedescriptor, int offset, int whence, int* newoffset) {
 		return VM_STATUS_SUCCESS;
 	}
+	
 
 }
