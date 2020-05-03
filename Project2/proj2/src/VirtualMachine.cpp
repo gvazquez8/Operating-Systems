@@ -37,7 +37,6 @@ extern "C" {
 	}
 
 	void timerCallback(void* calldata) {
-		std::cout << "here" << std::endl;
 		totalTickCount++;
 	}
 
@@ -169,6 +168,8 @@ extern "C" {
 		*stopUntilRef = *totalTickCountRef + tick;
 
 		while(*totalTickCountRef < *stopUntilRef) {
+			std::cout << "Total: " << *totalTickCountRef << endl;
+			std::cout << "StopUntil: " << *stopUntilRef << endl;
 		}
 
 		return VM_STATUS_SUCCESS;
