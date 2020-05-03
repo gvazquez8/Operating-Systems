@@ -161,8 +161,8 @@ extern "C" {
 
 		TVMTickRef totalTickCount = NULL;
 		VMTickCount(totalTickCount);
-		*totalTickCount += tick;
-		while(*totalTickCount < stopUntil) {
+		TVMTickRef stopUntil = *totalTickCount + tick;
+		while(*totalTickCount < *stopUntil) {
 		}
 
 		return VM_STATUS_SUCCESS;
