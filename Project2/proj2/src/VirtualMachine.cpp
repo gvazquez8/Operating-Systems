@@ -165,7 +165,7 @@ extern "C" {
 		TVMTickRef stopUntilRef = &stopUntil;
 
 		if (VMTickCount(totalTickCountRef) == VM_STATUS_ERROR_INVALID_PARAMETER) {
-			std::cout << "Invalid" << std::endl
+			std::cout << "Invalid" << std::endl;
 		}
 
 		*stopUntilRef = *totalTickCountRef + tick;
