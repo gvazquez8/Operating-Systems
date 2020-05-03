@@ -7,13 +7,12 @@ extern "C" {
 	typedef void (*TVMMainEntry) (int, char* []);
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
-	int TickTimeMS;
+	int tickTimeMS = NULL;
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
-		if (VMMainReference == NULL) {
-			return VM_STATUS_FAILURE;
-		}
+		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
+		tickTimeMS = tickms;
 		MachineInitialize();
 		MachineEnableSignals();
 		VMMain(argc, argv);
@@ -23,6 +22,8 @@ extern "C" {
 	}
 
 	TVMStatus VMTickMS(int *tickmsref) {
+		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		*tickmsref = tickTimeMS;
 		return VM_STATUS_SUCCESS;
 	}
 

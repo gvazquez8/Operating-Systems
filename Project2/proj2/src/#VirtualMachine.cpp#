@@ -1,0 +1,90 @@
+#include "VirtualMachine.h"
+#include "Machine.h"
+#include <iostream>
+
+extern "C" {
+
+  typedef void (*TVMMainEntry) (int, char* []);
+	TVMMainEntry VMLoadModule(const char* module);
+	void VMUnloadModule(void);
+	int TickTimeMS;
+
+	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
+		TVMMainEntry VMMain = VMLoadModule(argv[0]);
+		if (VMMainReference == NULL) {
+			return VM_STATUS_FAILURE;
+		}
+		MachineInitialize();
+		MachineEnableSignals();
+		VMMain(argc, argv);
+		MachineTerminate();
+		VMUnloadModule();
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMTickMS(int *tickmsref) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMTickCount(TVMTickRef tickref) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsize,
+							 TVMThreadPriority prio, TVMThreadIDRef tid) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadDelete(TVMThreadID thread) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadActivate(TVMThreadID thread) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadTerminate(TVMThreadID thread) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadID(TVMThreadIDRef thread) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadState(TVMThreadID thread, TVMThreadStateRef stateref) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMThreadSleep(TVMTick tick) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *filedescriptor) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMFileClose(int filedescriptor) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMFileRead(int filedescriptor, void* data, int* length) {
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMFileWrite(int filedescriptor, void* data, int* length) {
+		if (data == NULL || length == NULL) {
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
+
+		if (write(filedescriptor, data, *length) != *length) {
+			return VM_STATUS_FAILURE;
+		}
+
+		return VM_STATUS_SUCCESS;
+	}
+
+	TVMStatus VMFileSeek(int filedescriptor, int offset, int whence, int* newoffset) {
+		return VM_STATUS_SUCCESS;
+	}
+
+}
