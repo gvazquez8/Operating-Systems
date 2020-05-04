@@ -126,7 +126,7 @@ extern "C" {
 		thread->prio = prio;
 		thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
 
-		threadHolder[thread->prio - 1].push_back(thread);
+		threadHolder[thread->prio - 1].push(thread);
 
 
 
