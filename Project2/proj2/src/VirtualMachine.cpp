@@ -368,7 +368,7 @@ extern "C" {
 	void fileOpenCallBack(void *calldata, int result) {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 
-		*(args->fd) = 12;
+		*(args->fd) = result;
 
 		TVMThreadID prev = currThread;
 		currThread = args->id;
@@ -394,11 +394,12 @@ extern "C" {
 		callBackDataStorage cb;
 		cb.id = currThread;
 		cb.fd = fd;
+
 		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, &cb);
-		std::cout << "before" << std::endl;
 		schedule(0);
-		std::cout << "after" << std::endl;
-		std::cout << *fd << std::endl;
+
+		if (*fd < 0) {return VM_STATUS_FAILURE;}
+
 		return VM_STATUS_SUCCESS;
 	}
 
