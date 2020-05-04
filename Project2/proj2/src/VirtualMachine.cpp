@@ -45,7 +45,7 @@ extern "C" {
 		void* stackaddr;
 	};
 
-	TVMThreadID currThread = 0;
+	volatile TVMThreadID currThread = 1;
 
 	std::vector<Thread> threadHolder;
 	std::vector<std::queue<unsigned int>> readyThreads;
@@ -71,6 +71,8 @@ extern "C" {
 		TVMThreadID idleID, mainID;
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		VMThreadCreate(VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
+		threadHolder[idleID].state = VM_THREAD_STATE_READY;
+		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, threadHolder[idleID].entry, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
@@ -168,7 +170,9 @@ extern "C" {
 
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, threadHolder[thread].entry, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
-		MachineContextSwitch((SMachineContextRef)&s, threadHolder[thread].cntx);
+		threadHolder[currThread].state = VM_THREAD_STATE_READY;
+
+		MachineContextSwitch(threadHolder[currThread].cntx, threadHolder[thread].cntx);
 
 
 		return VM_STATUS_SUCCESS;
