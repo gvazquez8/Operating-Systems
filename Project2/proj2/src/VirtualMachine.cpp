@@ -43,7 +43,7 @@ extern "C" {
 
 	Thread *currThread = NULL;
 
-	std::vector<std::queue<&Thread>> threadHolder;
+	std::vector<std::queue<*Thread>> threadHolder;
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
@@ -52,9 +52,9 @@ extern "C" {
 	}
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
-		threadHolder.push_back(new std::queue<TVMThreadIDRef>);
-		threadHolder.push_back(new std::queue<TVMThreadIDRef>);
-		threadHolder.push_back(new std::queue<TVMThreadIDRef>);
+		threadHolder.push_back(new std::queue<*Thread>);
+		threadHolder.push_back(new std::queue<*Thread>);
+		threadHolder.push_back(new std::queue<*Thread>);
 
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
