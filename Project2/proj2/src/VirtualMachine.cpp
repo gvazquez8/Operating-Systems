@@ -88,9 +88,9 @@ extern "C" {
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
-			if (readyThreads[currThread.prio-1].size() != 0) {
-				nextThread = readyThreads[currThread.prio-1].front();
-				readyThreads[currThread.prio-1].pop();
+			if (readyThreads[(int)currThread.prio-1].size() != 0) {
+				nextThread = readyThreads[(int)currThread.prio-1].front();
+				readyThreads[(int)currThread.prio-1].pop();
 				dispatch(nextThread);
 				return;
 			}
