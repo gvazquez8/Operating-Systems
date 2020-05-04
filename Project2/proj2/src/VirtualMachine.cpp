@@ -155,7 +155,8 @@ extern "C" {
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		readyThreads[threadHolder[thread].prio - 1].push(threadHolder[thread].id);
 
-		std::cout << "Thread in readyQ: " << readyThreads[threadHolder[thread].prio-1].front() << std::endl;
+		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, threadHolder[thread].entry, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
+
 		return VM_STATUS_SUCCESS;
 	}
 

@@ -1,0 +1,4 @@
+Create an idle thread
+
+vmstart
+	create thread object to track main (prio = normal)

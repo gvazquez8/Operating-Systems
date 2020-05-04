@@ -1,7 +1,7 @@
 References:
 
-1.
-2.
+1. http://www.cplusplus.com/reference/vector/vector/
+2. http://www.cplusplus.com/reference/queue/queue/
 3.
 4.
 5.
