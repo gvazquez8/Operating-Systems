@@ -362,9 +362,10 @@ extern "C" {
 	}
 
 	void fileOpenCallBack(void *calldata, int result) {
-		std::vector<int*> args = (std::vector<int*>)calldata;
-		std::cout << "First Arg: " << *(args[0]) << std::endl;
-		std::cout << "Second Arg: " << *(args[1]) << std::endl;
+		int** args = (int**) callData;
+
+		std::cout << "First Arg: " << **args << std::endl;
+		std::cout << "Second Arg: " << *(*args+1) << std::endl;
 		std::cout << "Third Arg: " << result << std::endl;
 		schedule(0);
 	}
@@ -384,9 +385,9 @@ extern "C" {
 		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		*fd =12;
-		std::vector<int*> callData;
-		callData.push_back((int*)&currThread);
-		callData.push_back(fd);
+		int** callData;
+		*callData = (int*)&currThread;
+		(*callData+1) = fd;
 		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, callData);
 		std::cout << "after" << std::endl;
 		schedule(0);
