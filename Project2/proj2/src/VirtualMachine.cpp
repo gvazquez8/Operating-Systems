@@ -52,12 +52,11 @@ extern "C" {
 
 	void skeleton(void* param) {
 		std::cout << "in skeleton" << std::endl;
-		Thread* thread = (Thread*) param;
+		threadHolder[currThread].entry(threadHolder[currThread].args);
 		std::cout << "in skeleton" << std::endl;
-		thread->entry(thread->args);
+		VMThreadTerminate(currThread);
 		std::cout << "in skeleton" << std::endl;
 
-		VMThreadTerminate(thread->id);
 	}
 
 	void idle(void* param) {
