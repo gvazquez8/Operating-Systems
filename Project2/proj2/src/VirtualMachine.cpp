@@ -450,7 +450,7 @@ extern "C" {
 		callBackDataStorage cb;
 		cb.id = currThread;
 		cb.resultPtr = length;
-		MachineFileWrite(fd, data, length, &fileCallBack, &cb);
+		MachineFileWrite(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
 
 		if (*length < 0) {return VM_STATUS_FAILURE;}
