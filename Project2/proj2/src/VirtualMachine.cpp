@@ -53,7 +53,10 @@ extern "C" {
 	void skeleton(void* param) {
 		std::cout << "in skeleton" << std::endl;
 		Thread* thread = (Thread*) param;
+		std::cout << "in skeleton" << std::endl;
 		thread->entry(thread->args);
+		std::cout << "in skeleton" << std::endl;
+
 		VMThreadTerminate(thread->id);
 	}
 
