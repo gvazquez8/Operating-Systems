@@ -368,10 +368,10 @@ extern "C" {
 	void fileOpenCallBack(void *calldata, int result) {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 
-		std::cout << "First Arg: " << args->id << std::endl;
-		std::cout << "Second Arg: " << *(args->fd) << std::endl;
-		std::cout << "Third Arg: " << result << std::endl;
-		schedule(0);
+		*(args->fd) = 12;
+		VMThreadID prev = currThread;
+		currThread = args->id;
+		MachineContextSwitch(threadHolder[prev].cntx, threadHolder[currThread].cntx);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
@@ -396,6 +396,7 @@ extern "C" {
 		std::cout << "before" << std::endl;
 		schedule(0);
 		std::cout << "after" << std::endl;
+		std::cout << *fd << std::endl;
 		return VM_STATUS_SUCCESS;
 	}
 
