@@ -59,7 +59,7 @@ extern "C" {
 		TVMThreadID prev = currThread;
 		currThread = next;
 
-		std::cout << "Going from " << prev << " to " << next << std::endl;
+		// std::cout << "Going from " << prev << " to " << next << std::endl;
 		threadHolder[prev].state = VM_THREAD_STATE_READY;
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 
@@ -139,8 +139,8 @@ extern "C" {
 	}
 
 	void idle(void* param) {
+		std::cout << "In IDLE" << std::endl;
 		while(true) {
-			std::cout << "In IDLE" << std::endl;
 		}
 	}
 
