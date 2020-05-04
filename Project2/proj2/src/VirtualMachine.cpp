@@ -158,7 +158,7 @@ extern "C" {
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
-				sleepingThreads.erase(i);
+				sleepingThreads.erase(sleepingThreads.begin()+i);
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
