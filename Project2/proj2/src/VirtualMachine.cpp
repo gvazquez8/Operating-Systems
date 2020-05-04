@@ -35,7 +35,7 @@ extern "C" {
 	// Struct for FileOpen
 	struct callBackDataStorage {
 		TVMThreadID id;
-		int* fd;
+		int* resultPtr;
 	};
 	// TCB
 	class Thread {
@@ -365,10 +365,10 @@ extern "C" {
 		return VM_STATUS_SUCCESS;
 	}
 
-	void fileOpenCallBack(void *calldata, int result) {
+	void fileCallBack(void *calldata, int result) {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 
-		*(args->fd) = result;
+		*(args->resultPtr) = result;
 
 		TVMThreadID prev = currThread;
 		currThread = args->id;
@@ -395,7 +395,7 @@ extern "C" {
 		cb.id = currThread;
 		cb.fd = fd;
 
-		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, &cb);
+		MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
 		schedule(0);
 
 		if (*fd < 0) {return VM_STATUS_FAILURE;}
@@ -429,6 +429,9 @@ extern "C" {
 		return VM_STATUS_SUCCESS;
 	}
 
+	void fileWriteCallBack(void *calldata, int result) {
+
+	}
 	TVMStatus VMFileWrite(int fd, void* data, int* length) {
 		/* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
 			Params:
@@ -442,9 +445,15 @@ extern "C" {
 		*/
 		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
-		if (write(fd, data, *length) != *length) {
-			return VM_STATUS_FAILURE;
-		}
+		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+
+		fileOpenCallBack cb;
+		cb.id = currThread;
+		cb.resultPtr = length;
+		MachineFileWrite(fd, data, length, &fileCallBack, &cb);
+		schedule(0);
+
+		if (*length < 0) {return VM_STATUS_FAILURE;}
 
 		return VM_STATUS_SUCCESS;
 	}
