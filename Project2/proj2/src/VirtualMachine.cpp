@@ -51,6 +51,7 @@ extern "C" {
 	std::vector<std::queue<unsigned int>> readyThreads;
 
 	void skeleton(void* param) {
+		std::cout << "in skeleton" << std::endl;
 		Thread* thread = (Thread*) param;
 		thread->entry(thread->args);
 		VMThreadTerminate(thread->id);
