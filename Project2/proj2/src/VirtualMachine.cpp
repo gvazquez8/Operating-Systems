@@ -156,6 +156,7 @@ extern "C" {
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
+		readyThreads[threadHolder[idleID].prio-1].push(threadHolder[idleID].id);
 		threadHolder[mainID].state = VM_THREAD_STATE_RUNNING;
 		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 
