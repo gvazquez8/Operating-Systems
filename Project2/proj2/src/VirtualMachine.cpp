@@ -157,6 +157,12 @@ extern "C" {
 
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, threadHolder[thread].entry, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
+		SMachineContext s;
+
+		MachineContextSave(s);
+		MachineContextSwitch(s, threadHolder[thread].cntx);
+
+
 		return VM_STATUS_SUCCESS;
 	}
 
