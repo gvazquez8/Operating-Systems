@@ -387,7 +387,9 @@ extern "C" {
 		*fd =12;
 		int** callData;
 		*callData = (int*)&currThread;
-		(*callData)+1 = &fd;
+		callData++;
+		*callData = fd;
+		callData--;
 		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, callData);
 		std::cout << "after" << std::endl;
 		schedule(0);
