@@ -382,7 +382,7 @@ extern "C" {
 		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, fd);
+		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, fd, fd);
 		std::cout << "after" << std::endl;
 		schedule(0);
 		return VM_STATUS_SUCCESS;
