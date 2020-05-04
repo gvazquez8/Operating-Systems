@@ -15,9 +15,6 @@ extern "C" {
 	typedef void (*TVMMainEntry) (int, char* []);
 	typedef void (*TMachineAlarmCallback) (void* calldata);
 	typedef void (*TVMThreadEntry)(void*);
-	typedef struct{
- 		jmp_buf DJumpBuffer;
-	} SMachineContext, *SMachineContextRef;
 
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
