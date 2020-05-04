@@ -209,7 +209,7 @@ extern "C" {
 		if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
 
 		delete &threadHolder[thread];
-
+		schedule();
 		return VM_STATUS_SUCCESS;
 	}
 
