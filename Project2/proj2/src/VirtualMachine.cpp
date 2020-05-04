@@ -89,8 +89,8 @@ extern "C" {
 
 		if (scheduleEqualPrio == 1) {
 			if (readyThreads[(int)currThread.prio-1].size() != 0) {
-				nextThread = readyThreads[(int)currThread.prio-1].front();
-				readyThreads[(int)currThread.prio-1].pop();
+				nextThread = readyThreads[threadHolder[currThread].prio-1].front();
+				readyThreads[threadHolder[currThread].prio-1].pop();
 				dispatch(nextThread);
 				return;
 			}
