@@ -52,9 +52,9 @@ extern "C" {
 	}
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
-		threadHolder.push(new std::queue<TVMThreadIDRef>);
-		threadHolder.push(new std::queue<TVMThreadIDRef>);
-		threadHolder.push(new std::queue<TVMThreadIDRef>);
+		threadHolder.push_back(new std::queue<TVMThreadIDRef>);
+		threadHolder.push_back(new std::queue<TVMThreadIDRef>);
+		threadHolder.push_back(new std::queue<TVMThreadIDRef>);
 
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
