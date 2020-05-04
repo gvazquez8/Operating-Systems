@@ -160,7 +160,7 @@ extern "C" {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				sleepingThreads.erase(sleepingThreads.begin()+i);
 				TVMThreadID prv = currThread;
-				currThread = (TVMThreadID) i;
+				currThread = sleepingThreads[i];
 				threadHolder[prv].state = VM_THREAD_STATE_READY;
 				threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 				MachineContextSwitch((SMachineContextRef)&threadHolder[prv].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
