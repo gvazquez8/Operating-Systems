@@ -88,7 +88,7 @@ extern "C" {
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
-			if (readyThreads[(int)currThread.prio-1].size() != 0) {
+			if (readyThreads[threadHolder[currThread].prio-1].size() != 0) {
 				nextThread = readyThreads[threadHolder[currThread].prio-1].front();
 				readyThreads[threadHolder[currThread].prio-1].pop();
 				dispatch(nextThread);
@@ -155,7 +155,7 @@ extern "C" {
 
 	void timerCallback(void* calldata) {
 		totalTickCount++;
-		for (int i = 0; i < sleepingThreads.size(); i++) {
+		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				sleepingThreads.erase(i);
