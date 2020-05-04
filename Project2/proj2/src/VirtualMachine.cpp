@@ -43,7 +43,7 @@ extern "C" {
 
 	Thread *currThread = NULL;
 
-	std::vector<std::queue<*Thread>> threadHolder;
+	std::vector<std::queue<Thread>> threadHolder;
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
