@@ -156,6 +156,8 @@ extern "C" {
 	void timerCallback(void* calldata) {
 		totalTickCount++;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
+			std::cout << "Sleeping Thread id: " << threadHolder[sleepingThreads[i]].id;
+			std::cout << " ticks Remaining: " << threadHolder[sleepingThreads[i]].sleepCountdown;
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				sleepingThreads.erase(sleepingThreads.begin()+i);
