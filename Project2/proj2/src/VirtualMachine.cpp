@@ -43,7 +43,7 @@ extern "C" {
 
 	Thread *currThread = NULL;
 
-	std::vector<std::queue<Thread>> threadHolder;
+	std::vector<Thread> threadHolder;
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
@@ -123,10 +123,9 @@ extern "C" {
 		thread->memsize = memsize;
 		thread->prio = prio;
 		thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
-
-		threadHolder[thread->prio - 1].push(*thread);
-
-
+		thread->id = threadHolder.size();
+		*tid = thread->id;
+		threadHolder.push_back(*thread);
 
 		return VM_STATUS_SUCCESS;
 	}
