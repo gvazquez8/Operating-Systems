@@ -4,11 +4,20 @@
 
 extern "C" {
 	// Stuff for functions in headers
-	#define VM_TIMEOUT_INFINITE ((TVMTick)0)
-	#define VM_TIMEOUT_IMMEDIATE ((TVMTick)-1)
+	#define VM_TIMEOUT_INFINITE						((TVMTick)0)
+	#define VM_TIMEOUT_IMMEDIATE					((TVMTick)-1)
+
+	#define VM_THREAD_STATE_DEAD                    ((TVMThreadState)0x00)
+	#define VM_THREAD_STATE_RUNNING                 ((TVMThreadState)0x01)
+	#define VM_THREAD_STATE_READY                   ((TVMThreadState)0x02)
+	#define VM_THREAD_STATE_WAITING                 ((TVMThreadState)0x03)
 
 	typedef void (*TVMMainEntry) (int, char* []);
 	typedef void (*TMachineAlarmCallback) (void* calldata);
+	typedef void (*TVMThreadEntry)(void*);
+	typedef struct{
+ 		jmp_buf DJumpBuffer;
+	} SMachineContext, *SMachineContextRef;
 
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
@@ -19,9 +28,31 @@ extern "C" {
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
 
-	// class TCB {
 
-	// }
+	// TCB
+	class Thread {
+	public:
+		TVMThreadID id;
+		TVMThreadState state;
+		TVMThreadPriority prio;
+		TVMThreadEntry entry;
+		void* args;
+		SMachineContext cntx;
+		TVMMemorySize memsize;
+		void* stackaddr;
+	};
+
+	Thread *currThread = NULL;
+
+	std::vector<std::queue<TVMThreadIDRef>> threadHolder;
+	threadHolder.resize(3);
+
+	void skeleton(void* param) {
+		Thread* thread = (Thread*) param;
+		thread->entry(thread->args);
+		VMThreadTerminate(thread->id);
+	}
+
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
@@ -83,8 +114,18 @@ extern "C" {
 		    	VM_STATUS_SUCCESS on successful creation
 		    	VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
 		*/
-
 		if (entry == NULL || tid == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+
+		Thread thread = new Thread();
+		thread.state = VM_THREAD_STATE_DEAD;
+		thread.entry = entry;
+		thread.args = param;
+		thread.memsize = memsize;
+		thread.prio = prio;
+		thread.stackaddr = malloc(thread.memsize * sizeof(TVMMemorySize));
+
+		threadHolder[thread.prio - 1].push(&thread);
+
 
 
 		return VM_STATUS_SUCCESS;
