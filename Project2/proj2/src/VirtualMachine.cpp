@@ -447,7 +447,7 @@ extern "C" {
 
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-		fileOpenCallBack cb;
+		callBackDataStorage cb;
 		cb.id = currThread;
 		cb.resultPtr = length;
 		MachineFileWrite(fd, data, length, &fileCallBack, &cb);
