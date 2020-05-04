@@ -367,7 +367,6 @@ extern "C" {
 
 	void fileCallBack(void *calldata, int result) {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
-
 		*(args->resultPtr) = result;
 
 		TVMThreadID prev = currThread;
@@ -429,9 +428,6 @@ extern "C" {
 		return VM_STATUS_SUCCESS;
 	}
 
-	void fileWriteCallBack(void *calldata, int result) {
-
-	}
 	TVMStatus VMFileWrite(int fd, void* data, int* length) {
 		/* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
 			Params:
@@ -458,7 +454,7 @@ extern "C" {
 		return VM_STATUS_SUCCESS;
 	}
 
-	TVMStatus VMFileSeek(int filedescriptor, int offset, int whence, int* newoffset) {
+	TVMStatus VMFileSeek(int fd, int offset, int whence, int* newoffset) {
 		/* Seeks within a file. VM_THREAD_STATE_WAITING until success or failure
 			Params:
 				fd = file descriptor, obtained by prev call to VMFileOpen()
@@ -469,6 +465,26 @@ extern "C" {
 				VM_STATUS_SUCCESS on success
 				VM_STATUS_FAILURE on failure
 		*/
+		int placeHolder = 0;
+		int* tempPointer = &placeHolder;
+
+		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+
+		callBackDataStorage cb;
+		cb.id = currThread;
+		cb.resultPtr = tempPointer;
+
+		MachineFileSeek(fd, offset, whence, &fileCallBack, &cb);
+		schedule(0);
+
+		if (newoffset != NULL) {
+			*newoffset = *tempPointer;
+			if (*newoffset < 0) {return VM_STATUS_FAILURE;}
+		}
+		else {
+			if (*tempPointer < 0) {return VM_STATUS_FAILURE;}
+		}
+
 		return VM_STATUS_SUCCESS;
 	}
 
