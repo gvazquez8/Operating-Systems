@@ -121,7 +121,9 @@ extern "C" {
 	}
 
 	void idle(void* param) {
-		while(true) {}
+		while(true) {
+			std::cout << "In IDLE" << std::endl;
+		}
 	}
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
@@ -160,11 +162,11 @@ extern "C" {
 			std::cout << " ticks Remaining: " << threadHolder[sleepingThreads[i]].sleepCountdown << std::endl;
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
-				sleepingThreads.erase(sleepingThreads.begin()+i);
 				TVMThreadID prv = currThread;
 				currThread = sleepingThreads[i];
 				threadHolder[prv].state = VM_THREAD_STATE_READY;
 				threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
+				sleepingThreads.erase(sleepingThreads.begin()+i);
 				MachineContextSwitch((SMachineContextRef)&threadHolder[prv].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
