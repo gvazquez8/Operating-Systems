@@ -119,14 +119,14 @@ extern "C" {
 		if (entry == NULL || tid == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
 		Thread *thread = new Thread();
-		thread.state = VM_THREAD_STATE_DEAD;
-		thread.entry = entry;
-		thread.args = param;
-		thread.memsize = memsize;
-		thread.prio = prio;
-		thread.stackaddr = malloc(thread.memsize * sizeof(TVMMemorySize));
+		thread->state = VM_THREAD_STATE_DEAD;
+		thread->entry = entry;
+		thread->args = param;
+		thread->memsize = memsize;
+		thread->prio = prio;
+		thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
 
-		threadHolder[thread.prio - 1].push_back(&thread);
+		threadHolder[thread->prio - 1].push_back(thread);
 
 
 
