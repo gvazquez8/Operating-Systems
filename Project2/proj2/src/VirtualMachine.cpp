@@ -188,11 +188,11 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID if thread does not exist
 				VM_STATUS_ERROR_INVALID_PARAMETER on stateref = NULL
 		*/
-		if (stateref == NULL || thread == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		if (stateref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
-		if (*thread > threadHolder.size()-1 || *thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
+		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 
-		*stateref = threadHolder[*thread]->state;
+		*stateref = threadHolder[thread]->state;
 		return VM_STATUS_SUCCESS;
 	}
 
