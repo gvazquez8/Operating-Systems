@@ -362,7 +362,7 @@ extern "C" {
 	}
 
 	void fileOpenCallBack(void *calldata, int result) {
-		std::vector<int*> = (std::vector<int*>)calldata;
+		std::vector<int*> args = (std::vector<int*>)calldata;
 		std::cout << "First Arg: " << *(args[0]) << std::endl;
 		std::cout << "Second Arg: " << *(args[1]) << std::endl;
 		std::cout << "Third Arg: " << result << std::endl;
