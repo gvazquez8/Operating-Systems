@@ -69,14 +69,14 @@ extern "C" {
 			int oldSize = oldStates.size();
 			// make vector longer to equal size of num threads
 			oldStates.resize(threadHolder.size());
-			for (int i = oldSize; i < threadHolder.size(); i++) {
+			for (unsigned int i = oldSize; i < threadHolder.size(); i++) {
 				oldStates[i] = threadHolder[i].state;
 				if (threadHolder[i].state == VM_THREAD_STATE_READY) {
 					 readyThreads[threadHolder[i].prio-1].push(threadHolder[i].id);
 				}
 			}
 		}
-		for (int i = 0; i < threadHolder.size(); i++) {
+		for (unsigned int i = 0; i < threadHolder.size(); i++) {
 			if ((oldStates[i] != VM_THREAD_STATE_READY) && (threadHolder[i].state == VM_THREAD_STATE_READY)) {
 				readyThreads[threadHolder[i].prio-1].push(threadHolder[i].id);
 			}
