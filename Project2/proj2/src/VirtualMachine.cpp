@@ -159,6 +159,11 @@ extern "C" {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				sleepingThreads.erase(sleepingThreads.begin()+i);
+				TVMThreadID prv = currThread;
+				currThread = (TVMThreadID) i;
+				threadHolder[prev].state = VM_THREAD_STATE_READY;
+				threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
+				MachineContextSwitch(threadHolder[prv].cntx, threadHolder[currThread].cntx);
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
