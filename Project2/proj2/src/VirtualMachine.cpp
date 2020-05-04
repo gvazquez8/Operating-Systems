@@ -393,7 +393,7 @@ extern "C" {
 
 		callBackDataStorage cb;
 		cb.id = currThread;
-		cb.fd = fd;
+		cb.resultPtr = fd;
 
 		MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
 		schedule(0);
