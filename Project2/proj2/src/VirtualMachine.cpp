@@ -368,7 +368,6 @@ extern "C" {
 	void fileOpenCallBack(void *calldata, int result) {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 
-		*(args->fd) = 12;
 		VMThreadID prev = currThread;
 		currThread = args->id;
 		threadHolder[prev].state = VM_THREAD_STATE_READY;
