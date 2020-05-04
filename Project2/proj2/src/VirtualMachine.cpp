@@ -44,9 +44,6 @@ extern "C" {
 	Thread *currThread = NULL;
 
 	std::vector<std::queue<TVMThreadIDRef>> threadHolder;
-	threadHolder.push(new std::queue<TVMThreadIDRef>);
-	threadHolder.push(new std::queue<TVMThreadIDRef>);
-	threadHolder.push(new std::queue<TVMThreadIDRef>);
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
@@ -55,6 +52,10 @@ extern "C" {
 	}
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
+		threadHolder.push(new std::queue<TVMThreadIDRef>);
+		threadHolder.push(new std::queue<TVMThreadIDRef>);
+		threadHolder.push(new std::queue<TVMThreadIDRef>);
+
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
 		tickTimeMSArg = tickms;
