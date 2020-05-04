@@ -425,6 +425,17 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
 		*/
 		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+
+		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+
+		callBackDataStorage cb;
+		cb.id = currThread;
+		cb.resultPtr = length;
+
+		MachineFileRead(fd, data, *length, &fileCallBack, &cb);
+		schedule(0);
+		if (*length < 0) {return VM_STATUS_FAILURE;}
+
 		return VM_STATUS_SUCCESS;
 	}
 
