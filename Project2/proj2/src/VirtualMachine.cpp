@@ -21,6 +21,7 @@ extern "C" {
 	typedef void (*TVMMainEntry) (int, char* []);
 	typedef void (*TMachineAlarmCallback) (void* calldata);
 	typedef void (*TVMThreadEntry)(void*);
+	typedef void (*TMachineFileCallback)(void *calldata, int result);
 
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
@@ -360,6 +361,8 @@ extern "C" {
 		return VM_STATUS_SUCCESS;
 	}
 
+	void fileOpenCallBack(void *calldata, int result) {
+	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
 		   Thread is in VM_THREAD_STATE_WAITING until success or failure of FileOpen
@@ -370,10 +373,12 @@ extern "C" {
 				fd = file descriptor to use
 			Returns:
 				VM_STATUS_SUCCESS on successful open
-				VM_STATUS_FAILURE on filaure
+				VM_STATUS_FAILURE on failure
 				VM_STATUS_ERROR_INVALID_PARAMETER if fd or filename are NULL
 		*/
 		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, fd);
 		return VM_STATUS_SUCCESS;
 	}
 
