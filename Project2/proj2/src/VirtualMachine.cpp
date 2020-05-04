@@ -44,6 +44,7 @@ extern "C" {
 	Thread *currThread = NULL;
 
 	std::vector<Thread> threadHolder;
+	std::vector<std::queue<VMThreadID>> readyThreads;
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
@@ -52,7 +53,7 @@ extern "C" {
 	}
 
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
-		threadHolder.resize(3);
+		readyThreads.resize(3);
 
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
@@ -100,8 +101,7 @@ extern "C" {
 		return VM_STATUS_SUCCESS;
 	}
 
-	TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsize,
-							 TVMThreadPriority prio, TVMThreadIDRef tid) {
+	TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsize, TVMThreadPriority prio, TVMThreadIDRef tid) {
 		/* Create a thread in VM
 			Params:
 				Thread is created in dead state
@@ -151,6 +151,12 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread
 				VM_STATUS_ERROR_INVALID_STATE on valid thread but not dead
 		*/
+		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
+
+		threadHolder[thread].state = VM_THREAD_STATE_READY;
+		readyThreads[threadHolder[thread].prio - 1].push(threadHolder[thread].id);
+
+		std::cout << "Thread in readyQ: " << readyThreads[threadHolder[thread].prio-1].front() << std::endl;
 		return VM_STATUS_SUCCESS;
 	}
 
