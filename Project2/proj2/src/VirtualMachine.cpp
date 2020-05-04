@@ -32,7 +32,11 @@ extern "C" {
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
 
-
+	// Struct for FileOpen
+	struct callBackDataStorage {
+		TVMThreadID id;
+		int* fd;
+	}
 	// TCB
 	class Thread {
 	public:
@@ -362,10 +366,10 @@ extern "C" {
 	}
 
 	void fileOpenCallBack(void *calldata, int result) {
-		int** args = (int**) calldata;
+		callBackDataStorage *args = (callBackDataStorage*) &calldata;
 
-		std::cout << "First Arg: " << **args << std::endl;
-		std::cout << "Second Arg: " << *(*args+1) << std::endl;
+		std::cout << "First Arg: " << args->id << std::endl;
+		std::cout << "Second Arg: " << *(args->fd) << std::endl;
 		std::cout << "Third Arg: " << result << std::endl;
 		schedule(0);
 	}
@@ -386,9 +390,10 @@ extern "C" {
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		*fd =12;
 
-		int* arr[] = {(int*)&currThread, &fd};
-		int (*callData)[2] = &arr;
-		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, callData);
+		callBackDataStorage cb;
+		cb.id = currThread;
+		cb.fd = fd;
+		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, cb);
 		std::cout << "after" << std::endl;
 		schedule(0);
 		return VM_STATUS_SUCCESS;
