@@ -172,10 +172,9 @@ extern "C" {
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
 		threadHolder[currThread].state = VM_THREAD_STATE_READY;
-
-		MachineContextSwitch((SMachineContextRef)&threadHolder[currThread].cntx, (SMachineContextRef)&threadHolder[thread].cntx);
-
+		TVMThreadID prevThread = currThread;
 		currThread = thread;
+		MachineContextSwitch((SMachineContextRef)&threadHolder[prevThread].cntx, (SMachineContextRef)&threadHolder[thread].cntx);
 
 
 		return VM_STATUS_SUCCESS;
