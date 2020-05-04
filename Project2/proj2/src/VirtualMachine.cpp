@@ -382,6 +382,7 @@ extern "C" {
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, fd);
 		std::cout << "after" << std::endl;
+		schedule(0);
 		return VM_STATUS_SUCCESS;
 	}
 
