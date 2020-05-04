@@ -362,7 +362,6 @@ extern "C" {
 	}
 
 	void fileOpenCallBack(void *calldata, int result) {
-		int *p = (int*)calldata;
 		std::cout << "IN THE CALLBACK" << result << std::endl;
 		schedule(0);
 	}
