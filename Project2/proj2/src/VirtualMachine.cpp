@@ -132,13 +132,13 @@ extern "C" {
 	}
 
 	void skeleton(void* param) {
-		std::cout << "in skeleton with id: " << currThread << std::endl;
+		// std::cout << "in skeleton with id: " << currThread << std::endl;
 		threadHolder[currThread].entry(threadHolder[currThread].args);
 		VMThreadTerminate(currThread);
 	}
 
 	void idle(void* param) {
-		std::cout << "In IDLE" << std::endl;
+		// std::cout << "In IDLE" << std::endl;
 		while(true) {
 		}
 	}
