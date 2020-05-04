@@ -44,7 +44,7 @@ extern "C" {
 	Thread *currThread = NULL;
 
 	std::vector<Thread> threadHolder;
-	std::vector<std::queue<VMThreadID>> readyThreads;
+	std::vector<std::queue<unsigned int>> readyThreads;
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
