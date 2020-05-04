@@ -43,6 +43,7 @@ extern "C" {
 		SMachineContext cntx;
 		TVMMemorySize memsize;
 		void* stackaddr;
+		int sleepCountdown;
 	};
 
 	volatile TVMThreadID currThread = 1;
@@ -50,6 +51,7 @@ extern "C" {
 	std::vector<Thread> threadHolder;
 	// 0 = LOW, 1 = NORMAL, 2 = HIGH
 	std::vector<std::queue<unsigned int>> readyThreads;
+	std::vector<unsigned int> sleepingThreads;
 
 	std::vector<unsigned int> oldStates;
 
@@ -64,7 +66,7 @@ extern "C" {
 
 	}
 
-	void schedule() {
+	void schedule(int scheduleEqualPrio) {
 		if (oldStates.size() < threadHolder.size()) {
 			int oldSize = oldStates.size();
 			// make vector longer to equal size of num threads
@@ -84,6 +86,19 @@ extern "C" {
 		}
 
 		TVMThreadID nextThread;
+
+		if (scheduleEqualPrio == 1) {
+			if (readyThreads[currThread.prio-1].size() != 0) {
+				nextThread = readyThreads[currThread.prio-1].front();
+				readyThreads[currThread.prio-1].pop();
+				dispatch(nextThread);
+				return;
+			}
+			else {
+				return;
+			}
+		}
+
 		if (readyThreads[2].size() == 0 && readyThreads[1].size() == 0) {
 			nextThread = readyThreads[0].front();
 			readyThreads[0].pop();
@@ -95,13 +110,14 @@ extern "C" {
 			readyThreads[2].pop();
 		}
 
+
 		dispatch(nextThread);
 	}
+
 	void skeleton(void* param) {
 		std::cout << "in skeleton with id: " << currThread << std::endl;
 		threadHolder[currThread].entry(threadHolder[currThread].args);
 		VMThreadTerminate(currThread);
-
 	}
 
 	void idle(void* param) {
@@ -139,6 +155,14 @@ extern "C" {
 
 	void timerCallback(void* calldata) {
 		totalTickCount++;
+		for (int i = 0; i < sleepingThreads.size(); i++) {
+			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
+				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
+				sleepingThreads.erase(i);
+			} else {
+				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
+			}
+		}
 	}
 
 	TVMStatus VMTickMS(int *tickmsref) {
@@ -191,6 +215,7 @@ extern "C" {
 		thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
 		thread->id = threadHolder.size();
 		*tid = thread->id;
+		thread->sleepCountdown = 0;
 		threadHolder.push_back(*thread);
 
 		return VM_STATUS_SUCCESS;
@@ -227,7 +252,9 @@ extern "C" {
 
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
-		schedule();
+		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
+			schedule(0);
+		}
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -245,7 +272,7 @@ extern "C" {
 		if (threadHolder[thread].state == VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 
-		schedule();
+		schedule(0);
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -295,14 +322,13 @@ extern "C" {
 
 		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
-		TVMTick currentTickCount = 0;
-		TVMTick stopUntil = 0;
-		TVMTickRef totalTickCountRef = &currentTickCount;
-		TVMTickRef stopUntilRef = &stopUntil;
-
-		*stopUntilRef = *totalTickCountRef + tick;
-		while(*totalTickCountRef < *stopUntilRef) {
-			VMTickCount(totalTickCountRef);
+		if (tick == VM_TIMEOUT_IMMEDIATE) {
+			schedule(1);
+		} else {
+			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+			threadHolder[currThread].sleepCountdown = tick;
+			sleepingThreads.push_back(threadHolder[currThread].id);
+			schedule(0);
 		}
 
 		return VM_STATUS_SUCCESS;
