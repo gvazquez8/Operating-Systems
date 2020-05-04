@@ -72,7 +72,7 @@ extern "C" {
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
-		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, threadHolder[idleID].entry, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
+		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
@@ -168,7 +168,7 @@ extern "C" {
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		readyThreads[threadHolder[thread].prio - 1].push(threadHolder[thread].id);
 
-		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, threadHolder[thread].entry, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
+		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
 		threadHolder[currThread].state = VM_THREAD_STATE_READY;
 
