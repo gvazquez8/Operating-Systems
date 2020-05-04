@@ -19,9 +19,6 @@ extern "C" {
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
 
-	class TCB {
-
-	}
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
