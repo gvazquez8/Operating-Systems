@@ -70,7 +70,7 @@ extern "C" {
 		// create the idle and main thread;
 		TVMThreadID idleID, mainID;
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
-		VMThreadCreate(VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
+		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
 		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, threadHolder[idleID].entry, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 		// create alarm for tick incrementing
