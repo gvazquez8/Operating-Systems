@@ -44,7 +44,9 @@ extern "C" {
 	Thread *currThread = NULL;
 
 	std::vector<std::queue<TVMThreadIDRef>> threadHolder;
-	threadHolder.resize(3);
+	threadHolder.push(new std::queue<TVMThreadIDRef>);
+	threadHolder.push(new std::queue<TVMThreadIDRef>);
+	threadHolder.push(new std::queue<TVMThreadIDRef>);
 
 	void skeleton(void* param) {
 		Thread* thread = (Thread*) param;
