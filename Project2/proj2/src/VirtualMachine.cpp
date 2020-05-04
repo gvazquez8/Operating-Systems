@@ -99,7 +99,6 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread param
 				VM_STATUS_ERROR_INVALID_STATE on non-dead thread
 		*/
-		if (thread == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		return VM_STATUS_SUCCESS;
 	}
 
