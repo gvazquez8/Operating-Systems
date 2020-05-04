@@ -362,7 +362,7 @@ extern "C" {
 	}
 
 	void fileOpenCallBack(void *calldata, int result) {
-		std::cout << "IN THE CALLBACK" << calldata << std::endl;
+		std::cout << "IN THE CALLBACK" << (char)calldata << std::endl;
 		schedule(0);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
@@ -380,7 +380,7 @@ extern "C" {
 		*/
 		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
-		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, fd);
+		MachineFileOpen(filename, flags, mode, &fileOpenCallBack, 's');
 		std::cout << "after" << std::endl;
 		schedule(0);
 		return VM_STATUS_SUCCESS;
