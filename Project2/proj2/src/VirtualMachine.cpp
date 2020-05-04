@@ -95,7 +95,7 @@ extern "C" {
 			readyThreads[2].pop();
 		}
 
-		dispatch(nextThread);
+		dispatch(&nextThread);
 	}
 	void skeleton(void* param) {
 		std::cout << "in skeleton with id: " << currThread << std::endl;
