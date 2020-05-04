@@ -14,6 +14,10 @@ extern "C" {
 	#define VM_THREAD_STATE_READY                   ((TVMThreadState)0x02)
 	#define VM_THREAD_STATE_WAITING                 ((TVMThreadState)0x03)
 
+	#define VM_THREAD_PRIORITY_LOW                  ((TVMThreadPriority)0x01)
+	#define VM_THREAD_PRIORITY_NORMAL               ((TVMThreadPriority)0x02)
+	#define VM_THREAD_PRIORITY_HIGH                 ((TVMThreadPriority)0x03)
+
 	typedef void (*TVMMainEntry) (int, char* []);
 	typedef void (*TMachineAlarmCallback) (void* calldata);
 	typedef void (*TVMThreadEntry)(void*);
@@ -41,7 +45,7 @@ extern "C" {
 		void* stackaddr;
 	};
 
-	Thread *currThread = NULL;
+	TVMThreadID currThread = 0;
 
 	std::vector<Thread> threadHolder;
 	std::vector<std::queue<unsigned int>> readyThreads;
@@ -52,6 +56,10 @@ extern "C" {
 		VMThreadTerminate(thread->id);
 	}
 
+	void idle(void* param) {
+		while(true) {}
+	}
+
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
 		readyThreads.resize(3);
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
@@ -59,7 +67,10 @@ extern "C" {
 		tickTimeMSArg = tickms;
 		MachineInitialize();
 		MachineEnableSignals();
-
+		// create the idle and main thread;
+		TVMThreadID idleID, mainID;
+		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
+		VMThreadCreate(VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
@@ -157,9 +168,6 @@ extern "C" {
 
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, threadHolder[thread].entry, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
-		SMachineContext &s;
-
-		MachineContextSave((SMachineContextRef)&s);
 		MachineContextSwitch((SMachineContextRef)&s, threadHolder[thread].cntx);
 
 
