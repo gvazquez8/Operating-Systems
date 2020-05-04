@@ -10,8 +10,8 @@ extern "C" {
 	typedef void (*TVMMainEntry) (int, char* []);
 	typedef void (*TMachineAlarmCallback) (void* calldata);
 
-	TVMMainEntry VMLoadModule(const char* module);
-	void VMUnloadModule(void);
+	// TVMMainEntry VMLoadModule(const char* module);
+	// void VMUnloadModule(void);
 	void timerCallback(void*);
 
 	// Store the tickms arg that was passed when starting the program
@@ -19,6 +19,9 @@ extern "C" {
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
 
+	class TCB {
+
+	}
 	TVMStatus VMStart(int tickms, int argc, char* argv[]) {
 		TVMMainEntry VMMain = VMLoadModule(argv[0]);
 		if (VMMain == NULL) {return VM_STATUS_FAILURE;}
@@ -41,26 +44,26 @@ extern "C" {
 	}
 
 	TVMStatus VMTickMS(int *tickmsref) {
-	/* Retrieves milliseconds between ticks of VM
-		Params:
-			tickmsref = location to put tick time interval in ms
-		Returns:
-			VM_STATUS_SUCCESS on successful retireval
-			VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
-	*/
+		/* Retrieves milliseconds between ticks of VM
+			Params:
+				tickmsref = location to put tick time interval in ms
+			Returns:
+				VM_STATUS_SUCCESS on successful retireval
+				VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
+		*/
 		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		*tickmsref = tickTimeMSArg;
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMTickCount(TVMTickRef tickref) {
-	/* Retrieves number of ticks that have occurred since start of VM
-		Params:
-			tickref = location to put ticks
-		Returns:
-			VM_STATUS_SUCCESS on success
-			VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
-	*/
+		/* Retrieves number of ticks that have occurred since start of VM
+			Params:
+				tickref = location to put ticks
+			Returns:
+				VM_STATUS_SUCCESS on success
+				VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
+		*/
 		if (tickref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		*tickref = totalTickCount;
 		return VM_STATUS_SUCCESS;
@@ -68,80 +71,86 @@ extern "C" {
 
 	TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsize,
 							 TVMThreadPriority prio, TVMThreadIDRef tid) {
-	/* Create a thread in VM
-		Params:
-			Thread is created in dead state
-			entry = function of the thread
-			param = parameter of function
-			memsize = memory size
-			prio = priority (1 = LOW, 2 = NORMAL, 3 = HIGH) (1 = IDLE)
-			tid = thread identifier (ID)
-	  	Returns:
-	    	VM_STATUS_SUCCESS on successful creation
-	    	VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
-	*/
+		/* Create a thread in VM
+			Params:
+				Thread is created in dead state
+				entry = function of the thread
+				param = parameter of function
+				memsize = memory size
+				prio = priority (1 = LOW, 2 = NORMAL, 3 = HIGH) (1 = IDLE)
+				tid = thread identifier (ID)
+		  	Returns:
+		    	VM_STATUS_SUCCESS on successful creation
+		    	VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
+		*/
+
+		if (entry == NULL || tid == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
 
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMThreadDelete(TVMThreadID thread) {
-	/* Deletes a DEAD thread
-		Params:
-			thread = thread ID
-		Returns:
-			VM_STATUS_SUCCESS on successful deletion
-			VM_STATUS_ERROR_INVALID_ID on NULL thread param
-			VM_STATUS_ERROR_INVALID_STATE on non-dead thread
-	*/
+		/* Deletes a DEAD thread
+			Params:
+				thread = thread ID
+			Returns:
+				VM_STATUS_SUCCESS on successful deletion
+				VM_STATUS_ERROR_INVALID_ID on NULL thread param
+				VM_STATUS_ERROR_INVALID_STATE on non-dead thread
+		*/
+		if (thread == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMThreadActivate(TVMThreadID thread) {
-	/* Activate DEAD thread
-		Params:
-			thread = dead thread ID
-		Returns:
-			VM_STATUS_SUCCESS on successful activation
-			VM_STATUS_ERROR_INVALID_ID on NULL thread
-			VM_STATUS_ERROR_INVALID_STATE on valid thread but not dead
-	*/
+		/* Activate DEAD thread
+			Params:
+				thread = dead thread ID
+			Returns:
+				VM_STATUS_SUCCESS on successful activation
+				VM_STATUS_ERROR_INVALID_ID on NULL thread
+				VM_STATUS_ERROR_INVALID_STATE on valid thread but not dead
+		*/
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMThreadTerminate(TVMThreadID thread) {
-	/* Terminate thread
-		Params:
-			thread = thread ID
-		Returns:
-			VM_STATUS_SUCCESS on successful termination
-			VM_STATUS_ERROR_INVALID_ID on NULL thread
-			VM_STATUS_ERROR_INVALID_STATE on valid dead thread
-	*/
+		/* Terminate thread
+			Params:
+				thread = thread ID
+			Returns:
+				VM_STATUS_SUCCESS on successful termination
+				VM_STATUS_ERROR_INVALID_ID on NULL thread
+				VM_STATUS_ERROR_INVALID_STATE on valid dead thread
+		*/
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMThreadID(TVMThreadIDRef thread) {
-	/* Retrieve thread identifier of current operating thread
-		Params:
-			threadref = location to put thread ID
-		Returns:
-			VM_STATUS_SUCCESS on successful retrieval
-			VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
-	*/
+		/* Retrieve thread identifier of current operating thread
+			Params:
+				threadref = location to put thread ID
+			Returns:
+				VM_STATUS_SUCCESS on successful retrieval
+				VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
+		*/
+		if (thread == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMThreadState(TVMThreadID thread, TVMThreadStateRef stateref) {
-	/* Retrieves state of a thread in VM
-		Params:
-			thread = thread ID
-			stateref = place to put thread state
-		Returns:
-			VM_STATUS_SUCCESS on successsful retrieval of state
-			VM_STATUS_ERROR_INVALID_ID if thread does not exist
-			VM_STATUS_ERROR_INVALID_PARAMETER on stateref = NULL
-	*/
+		/* Retrieves state of a thread in VM
+			Params:
+				thread = thread ID
+				stateref = place to put thread state
+			Returns:
+				VM_STATUS_SUCCESS on successsful retrieval of state
+				VM_STATUS_ERROR_INVALID_ID if thread does not exist
+				VM_STATUS_ERROR_INVALID_PARAMETER on stateref = NULL
+		*/
+		if (stateref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -185,48 +194,48 @@ extern "C" {
 				VM_STATUS_FAILURE on filaure
 				VM_STATUS_ERROR_INVALID_PARAMETER if fd or filename are NULL
 		*/
+		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMFileClose(int fd) {
-	/* Closes a file. VM_THREAD_STATE_WAITING until successful/unsuccessful close
-		Params:
-			fd = file descriptor
-		Returns:
-			VM_STATUS_SUCCESS on successful close
-			VM_STATUS_FAILURE on failure
-	*/
+		/* Closes a file. VM_THREAD_STATE_WAITING until successful/unsuccessful close
+			Params:
+				fd = file descriptor
+			Returns:
+				VM_STATUS_SUCCESS on successful close
+				VM_STATUS_FAILURE on failure
+		*/
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMFileRead(int fd, void* data, int* length) {
-	/* Read file. Thread is VM_THREAD_STATE_WAITING until success or failure
-		Params:
-			fd = file descriptor
-			data = location where file data is stored
-			length = number of bytes
-		Returns:
-			VM_STATUS_SUCCESS on success
-			VM_STATUS_FAILURE on failure
-			VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
-	*/
+		/* Read file. Thread is VM_THREAD_STATE_WAITING until success or failure
+			Params:
+				fd = file descriptor
+				data = location where file data is stored
+				length = number of bytes
+			Returns:
+				VM_STATUS_SUCCESS on success
+				VM_STATUS_FAILURE on failure
+				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
+		*/
+		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		return VM_STATUS_SUCCESS;
 	}
 
 	TVMStatus VMFileWrite(int fd, void* data, int* length) {
-	/* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
-		Params:
-			fd = file descriptor
-			data = location where file data is stored
-			length = number of bytes
-		Returns:
-			VM_STATUS_SUCCESS on success
-			VM_STATUS_FAILURE on failure
-			VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
-	*/
-		if (data == NULL || length == NULL) {
-			return VM_STATUS_ERROR_INVALID_PARAMETER;
-		}
+		/* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
+			Params:
+				fd = file descriptor
+				data = location where file data is stored
+				length = number of bytes
+			Returns:
+				VM_STATUS_SUCCESS on success
+				VM_STATUS_FAILURE on failure
+				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
+		*/
+		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
 		if (write(fd, data, *length) != *length) {
 			return VM_STATUS_FAILURE;
@@ -236,16 +245,16 @@ extern "C" {
 	}
 
 	TVMStatus VMFileSeek(int filedescriptor, int offset, int whence, int* newoffset) {
-	/* Seeks within a file. VM_THREAD_STATE_WAITING until success or failure
-		Params:
-			fd = file descriptor, obtained by prev call to VMFileOpen()
-			offset = numbers of bytes to seek
-			whence = location to begin seeking
-			newoffset = the location to place the new offset if not NULL
-		Returns:
-			VM_STATUS_SUCCESS on success
-			VM_STATUS_FAILURE on failure
-			*/
+		/* Seeks within a file. VM_THREAD_STATE_WAITING until success or failure
+			Params:
+				fd = file descriptor, obtained by prev call to VMFileOpen()
+				offset = numbers of bytes to seek
+				whence = location to begin seeking
+				newoffset = the location to place the new offset if not NULL
+			Returns:
+				VM_STATUS_SUCCESS on success
+				VM_STATUS_FAILURE on failure
+		*/
 		return VM_STATUS_SUCCESS;
 	}
 
