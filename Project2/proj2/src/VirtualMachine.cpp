@@ -410,6 +410,17 @@ extern "C" {
 				VM_STATUS_SUCCESS on successful close
 				VM_STATUS_FAILURE on failure
 		*/
+		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+		int result;
+		callBackDataStorage cb;
+		cb.id = currThread;
+		cb.resultPtr = (int*)&result;
+
+		MachineFileClose(fd, &fileCallBack, &cb);
+
+		if (result < 0) {return VM_STATUS_FAILURE;}
+
+
 		return VM_STATUS_SUCCESS;
 	}
 
