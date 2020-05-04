@@ -362,7 +362,7 @@ extern "C" {
 	}
 
 	void fileOpenCallBack(void *calldata, int result) {
-		std::cout << "IN THE CALLBACK" << std::endl;
+		std::cout << "IN THE CALLBACK" << calldata << std::endl;
 		schedule(0);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
