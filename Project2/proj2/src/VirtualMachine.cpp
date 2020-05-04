@@ -1,6 +1,8 @@
 #include "VirtualMachine.h"
 #include "Machine.h"
 #include <iostream>
+#include <vector>
+#include <queue>
 
 extern "C" {
 	// Stuff for functions in headers
