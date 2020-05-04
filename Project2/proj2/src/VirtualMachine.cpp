@@ -48,8 +48,55 @@ extern "C" {
 	volatile TVMThreadID currThread = 1;
 
 	std::vector<Thread> threadHolder;
+	// 0 = LOW, 1 = NORMAL, 2 = HIGH
 	std::vector<std::queue<unsigned int>> readyThreads;
 
+	std::vector<unsigned int> oldStates;
+
+	void dispatch(TVMThreadID next) {
+		TVMThreadID prev = currThread;
+		currThread = next;
+
+		threadHolder[prev].state = VM_THREAD_STATE_READY;
+		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
+
+		MachineContextSwitch((SMachineContextRef)&threadHolder[prev].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
+
+	}
+
+	void schedule() {
+		if (oldStates.size() < threadHolder.size()) {
+			int oldSize = oldStates.size();
+			// make vector longer to equal size of num threads
+			oldStates.resize(threadHolder.size());
+			for (int i = oldSize; i < threadHolder.size(); i++) {
+				oldStates[i] = threadHolder[i].state;
+				if (threadHolder[i].state == VM_THREAD_STATE_READY) {
+					 readyThreads[threadHolder[i].prio-1].push(threadHolder[i].id);
+				}
+			}
+		}
+		for (int i = 0; i < threadHolder.size(); i++) {
+			if ((oldStates[i] != VM_THREAD_STATE_READY) && (threadHolder[i].state == VM_THREAD_STATE_READY)) {
+				readyThreads[threadHolder[i].prio-1].push(threadHolder[i].id);
+			}
+			oldStates[i] = threadHolder[i].state;
+		}
+
+		TVMThreadID nextThread;
+		if (readyThreads[2].size() == 0 && readyThreads[1].size() == 0) {
+			nextThread = readyThreads[0].front();
+			readyThreads[0].pop();
+		} else if (readyThreads[2].size() == 0 && readyThreads[1].size() != 0) {
+			nextThread = readyThreads[1].front();
+			readyThreads[1].pop();
+		} else {
+			nextThread = readyThreads[2].front();
+			readyThreads[2].pop();
+		}
+
+		dispatch(nextThread);
+	}
 	void skeleton(void* param) {
 		std::cout << "in skeleton with id: " << currThread << std::endl;
 		threadHolder[currThread].entry(threadHolder[currThread].args);
@@ -74,6 +121,12 @@ extern "C" {
 		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
 		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
+
+		// Store the old states. Will be used to determine if a thread needs to be push to readyQueue
+		oldStates.resize(2);
+		oldStates[idleID] = threadHolder[idleID].state;
+		oldStates[mainID] = threadHolder[mainID].state;
+
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
@@ -152,6 +205,11 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread param
 				VM_STATUS_ERROR_INVALID_STATE on non-dead thread
 		*/
+		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
+		if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
+
+		delete threadHolder[thread];
+
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -167,15 +225,10 @@ extern "C" {
 		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
-		readyThreads[threadHolder[thread].prio - 1].push(threadHolder[thread].id);
 
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
-		threadHolder[currThread].state = VM_THREAD_STATE_READY;
-		TVMThreadID prevThread = currThread;
-		currThread = thread;
-		MachineContextSwitch((SMachineContextRef)&threadHolder[prevThread].cntx, (SMachineContextRef)&threadHolder[thread].cntx);
-
+		schedule();
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -189,10 +242,16 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread
 				VM_STATUS_ERROR_INVALID_STATE on valid dead thread
 		*/
+		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
+		if (threadHolder[thread].state == VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
+		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
+
+
+
 		return VM_STATUS_SUCCESS;
 	}
 
-	TVMStatus VMThreadID(TVMThreadIDRef thread) {
+	TVMStatus VMThreadID(TVMThreadIDRef threadRef) {
 		/* Retrieve thread identifier of current operating thread
 			Params:
 				threadref = location to put thread ID
@@ -200,7 +259,8 @@ extern "C" {
 				VM_STATUS_SUCCESS on successful retrieval
 				VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
 		*/
-		if (thread == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		if (threadRef == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		*threadRef = currThread;
 		return VM_STATUS_SUCCESS;
 	}
 
