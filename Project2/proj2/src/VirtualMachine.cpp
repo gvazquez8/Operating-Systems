@@ -172,7 +172,9 @@ extern "C" {
 
 		threadHolder[currThread].state = VM_THREAD_STATE_READY;
 
-		MachineContextSwitch(threadHolder[currThread].cntx, threadHolder[thread].cntx);
+		MachineContextSwitch((SMachineContextRef)&threadHolder[currThread].cntx, (SMachineContextRef)&threadHolder[thread].cntx);
+
+		currThread = thread;
 
 
 		return VM_STATUS_SUCCESS;
