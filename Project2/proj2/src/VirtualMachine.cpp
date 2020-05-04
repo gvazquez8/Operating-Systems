@@ -159,8 +159,8 @@ extern "C" {
 
 		SMachineContext &s;
 
-		MachineContextSave(&s);
-		MachineContextSwitch(&s, threadHolder[thread].cntx);
+		MachineContextSave((SMachineContextRef)&s);
+		MachineContextSwitch((SMachineContextRef)&s, threadHolder[thread].cntx);
 
 
 		return VM_STATUS_SUCCESS;
