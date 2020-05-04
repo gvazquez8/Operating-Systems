@@ -60,7 +60,6 @@ extern "C" {
 		currThread = next;
 
 		// std::cout << "Going from " << prev << " to " << next << std::endl;
-		threadHolder[prev].state = VM_THREAD_STATE_READY;
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 
 		MachineContextSwitch((SMachineContextRef)&threadHolder[prev].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
@@ -87,22 +86,22 @@ extern "C" {
 		}
 
 
-		for (unsigned int i = 0; i < readyThreads.size(); i++) {
-			switch(i) {
-				case 0:	std::cout << "LOW THREADS: " << std::endl;
-				break;
-				case 1: std::cout << "NORMAL THREADS: " << std::endl;
-				break;
-				case 2: std::cout << "HIGH THREADS: " << std::endl;
-				break;
-				default: break;
-			}
-			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
-				std::cout << "thread ID: " << readyThreads[i].front() << std::endl;
-				readyThreads[i].push(readyThreads[i].front());
-				readyThreads[i].pop();
-			}
-		}
+		// for (unsigned int i = 0; i < readyThreads.size(); i++) {
+		// 	switch(i) {
+		// 		case 0:	std::cout << "LOW THREADS: " << std::endl;
+		// 		break;
+		// 		case 1: std::cout << "NORMAL THREADS: " << std::endl;
+		// 		break;
+		// 		case 2: std::cout << "HIGH THREADS: " << std::endl;
+		// 		break;
+		// 		default: break;
+		// 	}
+		// 	for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
+		// 		std::cout << "thread ID: " << readyThreads[i].front() << std::endl;
+		// 		readyThreads[i].push(readyThreads[i].front());
+		// 		readyThreads[i].pop();
+		// 	}
+		// }
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
