@@ -86,6 +86,23 @@ extern "C" {
 			oldStates[i] = threadHolder[i].state;
 		}
 
+
+		for (unsigned int i = 0; i < readyThreads.size(); i++) {
+			switch(i) {
+				case 0:	std::cout << "LOW THREADS: " << std::endl;
+				break;
+				case 1: std::cout << "NORMAL THREADS: " << std::endl;
+				break;
+				case 2: std::cout << "HIGH THREADS: " << std::endl;
+				break;
+				default: break;
+			}
+			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
+				std::cout << "thread ID: " << readyThreads[i].front() << std::endl;
+				readyThreads[i].push(readyThreads[i].front());
+				readyThreads[i].pop();
+			}
+		}
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
@@ -139,6 +156,7 @@ extern "C" {
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
+		threadHolder[mainID].state = VM_THREAD_STATE_RUNNING;
 		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 
 		// Store the old states. Will be used to determine if a thread needs to be push to readyQueue
