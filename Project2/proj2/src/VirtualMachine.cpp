@@ -95,7 +95,7 @@ extern "C" {
 			readyThreads[2].pop();
 		}
 
-		dispatch(&nextThread);
+		dispatch(nextThread);
 	}
 	void skeleton(void* param) {
 		std::cout << "in skeleton with id: " << currThread << std::endl;
@@ -208,7 +208,7 @@ extern "C" {
 		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 		if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
 
-		delete threadHolder[thread];
+		delete &threadHolder[thread];
 
 		return VM_STATUS_SUCCESS;
 	}
