@@ -64,7 +64,7 @@ extern "C" {
 		TVMThreadID prev = currThread;
 		currThread = next;
 
-		// std::cout << "Going from " << prev << " to " << next << std::endl;
+		std::cout << "Going from " << prev << " to " << next << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 
 		MachineContextSwitch((SMachineContextRef)&threadHolder[prev].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
