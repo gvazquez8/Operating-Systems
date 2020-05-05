@@ -77,6 +77,7 @@ extern "C" {
 
 	void schedule(int scheduleEqualPrio) {
 
+		std::cout << "schedule begin" << std::endl;
 		for (unsigned int i = 0; i < threadHolder.size(); i++) {
 			std::cout << "Thread ID: " << threadHolder[i].id << std::endl;
 			std::cout << "Thread state: " << threadHolder[i].state << std::endl;
@@ -88,6 +89,7 @@ extern "C" {
 			std::cout << "Thread stackaddr: " << threadHolder[i].stackaddr << std::endl;
 			std::cout << "Thread sleepCountdown: " << threadHolder[i].sleepCountdown << std::endl;
 		}
+		std::cout << "schedule end" << std::endl;
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
