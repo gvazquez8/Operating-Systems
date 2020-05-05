@@ -276,8 +276,9 @@ extern "C" {
 
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
-
+			dispatch(thread);
 		}
+
 		MachineResumeSignals(&signalState);
 
 		return VM_STATUS_SUCCESS;
