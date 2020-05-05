@@ -256,6 +256,7 @@ extern "C" {
 		*tid = thread->id;
 		thread->sleepCountdown = 0;
 		threadHolder.push_back(*thread);
+		std::cout << "created new thread: " << thread->id << std::endl;
 		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
 	}
