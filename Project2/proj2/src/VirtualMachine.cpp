@@ -232,6 +232,7 @@ extern "C" {
 		thread->args = param;
 		thread->memsize = memsize;
 		thread->prio = prio;
+		thread->cntx = new SMachineContext();
 		thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
 		thread->id = threadHolder.size();
 		*tid = thread->id;
