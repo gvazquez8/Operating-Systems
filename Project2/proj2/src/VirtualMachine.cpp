@@ -132,7 +132,7 @@ extern "C" {
 
 	void idle(void* param) {
 		while(true) {
-			std::cout << "In IDLE";
+			std::cout << "In IDLE" <<std::endl;
 		}
 	}
 
