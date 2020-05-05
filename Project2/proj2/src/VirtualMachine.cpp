@@ -132,7 +132,6 @@ extern "C" {
 
 	void idle(void* param) {
 		while(true) {
-			std::cout << "In IDLE" <<std::endl;
 		}
 	}
 
@@ -395,6 +394,8 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if fd or filename are NULL
 		*/
 		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+
+		MachineSuspendSignals(&signalState);
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -403,7 +404,7 @@ extern "C" {
 
 		MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
 		schedule(0);
-
+		MachineResumeSignals(&signalState);
 		if (*fd < 0) {return VM_STATUS_FAILURE;}
 
 		return VM_STATUS_SUCCESS;
@@ -417,13 +418,16 @@ extern "C" {
 				VM_STATUS_SUCCESS on successful close
 				VM_STATUS_FAILURE on failure
 		*/
+
+		MachineSuspendSignals(&signalState);
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		int result;
 		callBackDataStorage cb;
 		cb.id = currThread;
 		cb.resultPtr = (int*)&result;
-
 		MachineFileClose(fd, &fileCallBack, &cb);
+		schedule(0);
+		MachineResumeSignals(&signalState);
 
 		if (result < 0) {return VM_STATUS_FAILURE;}
 
@@ -444,6 +448,7 @@ extern "C" {
 		*/
 		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
+		MachineSuspendSignals(&signalState);
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -452,6 +457,7 @@ extern "C" {
 
 		MachineFileRead(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
+		MachineResumeSignals(&signalState);
 		if (*length < 0) {return VM_STATUS_FAILURE;}
 
 		return VM_STATUS_SUCCESS;
@@ -470,6 +476,7 @@ extern "C" {
 		*/
 		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
+		MachineSuspendSignals(&signalState);
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -477,7 +484,7 @@ extern "C" {
 		cb.resultPtr = length;
 		MachineFileWrite(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
-
+		MachineResumeSignals(&signalState);
 		if (*length < 0) {return VM_STATUS_FAILURE;}
 
 		return VM_STATUS_SUCCESS;
@@ -494,6 +501,7 @@ extern "C" {
 				VM_STATUS_SUCCESS on success
 				VM_STATUS_FAILURE on failure
 		*/
+		MachineSuspendSignals(&signalState);
 		int placeHolder = 0;
 		int* tempPointer = &placeHolder;
 
@@ -508,9 +516,11 @@ extern "C" {
 
 		if (newoffset != NULL) {
 			*newoffset = *tempPointer;
+			MachineResumeSignals(&signalState);
 			if (*newoffset < 0) {return VM_STATUS_FAILURE;}
 		}
 		else {
+			MachineResumeSignals(&signalState);
 			if (*tempPointer < 0) {return VM_STATUS_FAILURE;}
 		}
 
