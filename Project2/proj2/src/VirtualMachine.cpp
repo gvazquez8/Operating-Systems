@@ -89,7 +89,7 @@ extern "C" {
 				unsigned int id = readyThreads[j].front();
 				readyThreads[j].pop();
 				readyThreads[j].push(id);
-				std::cout << id << " ";
+				std::cout << (signed int) id << " ";
 			}
 			std::cout << std::endl;
 		}
