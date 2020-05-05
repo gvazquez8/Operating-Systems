@@ -106,8 +106,9 @@ extern "C" {
 			}
 			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
 				std::cout << "thread ID: " << readyThreads[i].front() << std::endl;
-				readyThreads[i].push(readyThreads[i].front());
+				TVMThreadID next = readyThreads[i].front();
 				readyThreads[i].pop();
+				readyThreads[i].push(next);
 			}
 		}
 		TVMThreadID nextThread;
@@ -297,7 +298,8 @@ extern "C" {
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
-			schedule(0);
+			threadHolder[currThread].state = VM_THREAD_STATE_READY;
+
 		}
 		MachineResumeSignals(&signalState);
 
