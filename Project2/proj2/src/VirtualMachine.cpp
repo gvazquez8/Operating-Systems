@@ -54,7 +54,7 @@ extern "C" {
 		int sleepCountdown;
 	};
 
-	volatile TVMThreadID currThread = 1;
+	TVMThreadID currThread = 1;
 
 	volatile std::vector<Thread> threadHolder;
 	// 0 = LOW, 1 = NORMAL, 2 = HIGH
