@@ -77,8 +77,8 @@ extern "C" {
 	void schedule(int scheduleEqualPrio) {
 		TVMThreadID nextThread;
 
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < readyThreads[i].size(); i++) {
+		for (unsigned int i = 0; i < 3; i++) {
+			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
 				TVMThreadID id = readyThreads[i].front();
 				readyThreads[i].pop();
 				if (threadHolder[id].state == VM_THREAD_STATE_READY) {
