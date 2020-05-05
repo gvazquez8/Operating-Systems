@@ -432,6 +432,7 @@ extern "C" {
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
 			return;
 		} else {
+			std::cout << "Inside of file callback: currThread = " << currThread << "\n";
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			dispatch(args->id);
 		}
