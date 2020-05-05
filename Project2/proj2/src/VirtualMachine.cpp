@@ -99,8 +99,6 @@ extern "C" {
 			nextThread = readyThreads[2].front();
 			readyThreads[2].pop();
 		}
-
-		std::cout << "Next thread to schedule: " << nextThread << std::endl;
 		dispatch(nextThread);
 	}
 
