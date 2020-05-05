@@ -381,7 +381,7 @@ extern "C" {
 		TVMThreadID prev = currThread;
 		currThread = args->id;
 		threadHolder[prev].state = VM_THREAD_STATE_READY;
-		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
+		dispatch(currThread);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
