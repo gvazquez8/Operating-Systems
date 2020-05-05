@@ -33,7 +33,7 @@ extern "C" {
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
 	// Signal State
-	TMachineSignalState signalState;
+	volatile TMachineSignalState signalState;
 
 	// Struct for FileOpen
 	struct callBackDataStorage {
@@ -56,12 +56,12 @@ extern "C" {
 
 	volatile TVMThreadID currThread = 1;
 
-	std::vector<Thread> threadHolder;
+	volatile std::vector<Thread> threadHolder;
 	// 0 = LOW, 1 = NORMAL, 2 = HIGH
-	std::vector<std::queue<unsigned int>> readyThreads;
-	std::vector<unsigned int> sleepingThreads;
+	volatile std::vector<std::queue<unsigned int>> readyThreads;
+	volatile std::vector<unsigned int> sleepingThreads;
 
-	std::vector<unsigned int> oldStates;
+	volatile std::vector<unsigned int> oldStates;
 
 	void dispatch(TVMThreadID next) {
 		TVMThreadID prev = currThread;
