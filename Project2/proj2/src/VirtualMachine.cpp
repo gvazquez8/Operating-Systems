@@ -145,8 +145,10 @@ extern "C" {
 		MachineEnableSignals();
 		// create the idle and main thread;
 		TVMThreadID idleID, mainID;
+
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x100000, VM_THREAD_PRIORITY_NORMAL, &mainID);
+
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
 		readyThreads[threadHolder[idleID].prio-1].push(threadHolder[idleID].id);
 		threadHolder[mainID].state = VM_THREAD_STATE_RUNNING;
@@ -238,7 +240,6 @@ extern "C" {
 		*tid = thread->id;
 		thread->sleepCountdown = 0;
 		threadHolder.push_back(*thread);
-		std::cout << "created new thread: " << thread->id << std::endl;
 		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
 	}
@@ -275,9 +276,7 @@ extern "C" {
 
 		MachineSuspendSignals(&signalState);
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
-		std::cout << "Activating Thread: " << thread << std::endl;
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
-		std::cout << "Activated Thread: " << thread << std::endl;
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
 			std::cout << "Dispatching thread: " << thread << " from " << currThread << " activate" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
