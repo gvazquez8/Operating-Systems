@@ -77,23 +77,6 @@ extern "C" {
 
 	void schedule(int scheduleEqualPrio) {
 		MachineResumeSignals(&signalState);
-		for (unsigned int i = 0; i < readyThreads.size(); i++) {
-			switch(i) {
-				case 0:	std::cout << "LOW THREADS: " << std::endl;
-				break;
-				case 1: std::cout << "NORMAL THREADS: " << std::endl;
-				break;
-				case 2: std::cout << "HIGH THREADS: " << std::endl;
-				break;
-				default: break;
-			}
-			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
-				std::cout << "thread ID: " << readyThreads[i].front() << std::endl;
-				TVMThreadID next = readyThreads[i].front();
-				readyThreads[i].pop();
-				readyThreads[i].push(next);
-			}
-		}
 
 		TVMThreadID nextThread;
 
