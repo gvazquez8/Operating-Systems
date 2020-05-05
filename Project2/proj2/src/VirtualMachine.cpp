@@ -22,6 +22,7 @@ extern "C" {
 	typedef void (*TMachineAlarmCallback) (void* calldata);
 	typedef void (*TVMThreadEntry)(void*);
 	typedef void (*TMachineFileCallback)(void *calldata, int result);
+	typedef sigset_t TMachineSignalState, *TMachineSignalStateRef;
 
 	TVMMainEntry VMLoadModule(const char* module);
 	void VMUnloadModule(void);
@@ -31,6 +32,8 @@ extern "C" {
 	int tickTimeMSArg;
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
+	// Signal State
+	TMachineSignalState signalState;
 
 	// Struct for FileOpen
 	struct callBackDataStorage {
@@ -204,8 +207,11 @@ extern "C" {
 				VM_STATUS_SUCCESS on successful retireval
 				VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
 		*/
+
 		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		MachineSuspendSignals(&signalState);
 		*tickmsref = tickTimeMSArg;
+		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -218,7 +224,9 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
 		*/
 		if (tickref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+		MachineSuspendSignals(&signalState);
 		*tickref = totalTickCount;
+		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
 	}
 
