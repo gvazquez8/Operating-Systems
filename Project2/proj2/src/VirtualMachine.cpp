@@ -77,32 +77,18 @@ extern "C" {
 
 	void schedule(int scheduleEqualPrio) {
 
+		for (unsigned int i = 0; i < threadHolder.size(); i++) {
+			std::cout << "Thread ID: " << threadHolder[i].id << std::endl;
+			std::cout << "Thread state: " << threadHolder[i].state << std::endl;
+			std::cout << "Thread priority: " << threadHolder[i].prio << std::endl;
+			std::cout << "Thread entry: " << threadHolder[i].entry << std::endl;
+			std::cout << "Thread args: " << threadHolder[i].args << std::endl;
+			std::cout << "Thread cntx: " << threadHolder[i].cmtx << std::endl;
+			std::cout << "Thread memsize: " << threadHolder[i].memsize << std::endl;
+			std::cout << "Thread stackaddr: " << threadHolder[i].stackaddr << std::endl;
+			std::cout << "Thread sleepCountdown: " << threadHolder[i].sleepCountdown << std::endl;
+		}
 		TVMThreadID nextThread;
-
-		// std::cout << "LOW PRIORITY QUEUE:" << std::endl;
-		// for (int i = 0; i < readyThreads[0].size(); i++) {
-		// 	TVMThreadID tid = readyThreads[0].front();
-		// 	std::cout << "Thread ID: " << tid << std::endl;
-		// 	readyThreads[0].pop();
-		// 	readyThreads[0].push(tid);
-		// }
-
-		// std::cout << "NORMAL PRIORITY QUEUE:" << std::endl;
-		// for (int i = 0; i < readyThreads[1].size(); i++) {
-		// 	TVMThreadID tid = readyThreads[1].front();
-		// 	std::cout << "Thread ID: " << tid << std::endl;
-		// 	readyThreads[1].pop();
-		// 	readyThreads[1].push(tid);
-		// }
-
-		// std::cout << "HIGH PRIORITY QUEUE:" << std::endl;
-		// for (int i = 0; i < readyThreads[2].size(); i++) {
-		// 	TVMThreadID tid = readyThreads[2].front();
-		// 	std::cout << "Thread ID: " << tid << std::endl;
-		// 	readyThreads[2].pop();
-		// 	readyThreads[2].push(tid);
-		// }
-
 
 		if (scheduleEqualPrio == 1) {
 			if (readyThreads[threadHolder[currThread].prio-1].size() != 0) {
