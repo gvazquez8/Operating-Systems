@@ -77,7 +77,6 @@ extern "C" {
 	void schedule(int scheduleEqualPrio) {
 		TVMThreadID nextThread;
 
-		MachineSuspendSignals(&signalState);
 		for (unsigned int i = 0; i < 3; i++) {
 			if (i == 0) {
 				std::cout << "LOW THREADS: ";
@@ -94,7 +93,7 @@ extern "C" {
 			}
 			std::cout << std::endl;
 		}
-		MachineResumeSignals(&signalState);
+
 		for (unsigned int i = 0; i < 3; i++) {
 			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
 				TVMThreadID id = readyThreads[i].front();
