@@ -126,8 +126,8 @@ extern "C" {
 		// create the idle and main thread;
 		TVMThreadID idleID, mainID;
 
-		VMThreadCreate(idle, NULL, 0x1000000, VM_THREAD_PRIORITY_LOW, &idleID);
-		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x1000000, VM_THREAD_PRIORITY_NORMAL, &mainID);
+		VMThreadCreate(idle, NULL, 0x10000000, VM_THREAD_PRIORITY_LOW, &idleID);
+		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x10000000, VM_THREAD_PRIORITY_NORMAL, &mainID);
 
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
 		readyThreads[threadHolder[idleID].prio-1].push(threadHolder[idleID].id);
