@@ -171,14 +171,14 @@ extern "C" {
 	}
 
 	void timerCallback(void* calldata) {
+		MachineSuspendSignals(&signalState);
 		totalTickCount++;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				if (threadHolder[sleepingThreads[i]].prio > threadHolder[currThread].prio) {
-					MachineSuspendSignals(&signalState);
 					dispatch(sleepingThreads[i]);
-					MachineSuspendSignals(&signalState);
+
 				}
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
@@ -195,8 +195,11 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
 		*/
 
-		if (tickmsref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		MachineSuspendSignals(&signalState);
+		if (tickmsref == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
 		*tickmsref = tickTimeMSArg;
 		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
@@ -210,8 +213,11 @@ extern "C" {
 				VM_STATUS_SUCCESS on success
 				VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
 		*/
-		if (tickref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		MachineSuspendSignals(&signalState);
+		if (tickref == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
 		*tickref = totalTickCount;
 		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
@@ -230,8 +236,11 @@ extern "C" {
 		    	VM_STATUS_SUCCESS on successful creation
 		    	VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
 		*/
-		if (entry == NULL || tid == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		MachineSuspendSignals(&signalState);
+		if (entry == NULL || tid == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
 		Thread *thread = new Thread();
 		thread->state = VM_THREAD_STATE_DEAD;
 		thread->entry = entry;
@@ -256,10 +265,16 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread param
 				VM_STATUS_ERROR_INVALID_STATE on non-dead thread
 		*/
-		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
-		if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
-
 		MachineSuspendSignals(&signalState);
+		if (thread > threadHolder.size()-1 || thread < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_ID;
+		}
+		if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_STATE;
+		}
+
 		delete &threadHolder[thread];
 		MachineResumeSignals(&signalState);
 
@@ -275,9 +290,12 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread
 				VM_STATUS_ERROR_INVALID_STATE on valid thread but not dead
 		*/
-		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
-
 		MachineSuspendSignals(&signalState);
+		if (thread > threadHolder.size()-1 || thread < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_ID;
+		}
+
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
@@ -302,10 +320,16 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID on NULL thread
 				VM_STATUS_ERROR_INVALID_STATE on valid dead thread
 		*/
-		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
-		if (threadHolder[thread].state == VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
-
 		MachineSuspendSignals(&signalState);
+		if (thread > threadHolder.size()-1 || thread < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_ID;
+		}
+		if (threadHolder[thread].state == VM_THREAD_STATE_DEAD) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_STATE;
+		}
+
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		schedule(0);
 		MachineResumeSignals(&signalState);
@@ -321,9 +345,12 @@ extern "C" {
 				VM_STATUS_SUCCESS on successful retrieval
 				VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
 		*/
-		if (threadRef == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
 		MachineSuspendSignals(&signalState);
+		if (threadRef == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
+
 		*threadRef = currThread;
 		MachineResumeSignals(&signalState);
 
@@ -340,10 +367,16 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_ID if thread does not exist
 				VM_STATUS_ERROR_INVALID_PARAMETER on stateref = NULL
 		*/
-		if (stateref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
 		MachineSuspendSignals(&signalState);
-		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
+		if (stateref == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
+
+		if (thread > threadHolder.size()-1 || thread < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_ID;
+		}
 
 		*stateref = threadHolder[thread].state;
 		MachineResumeSignals(&signalState);
@@ -362,8 +395,11 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if tick = VM_TIMEOUT_INFINITE
 		*/
 
-		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 		MachineSuspendSignals(&signalState);
+		if (tick == VM_TIMEOUT_INFINITE) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
 			schedule(1);
 		} else {
@@ -397,9 +433,11 @@ extern "C" {
 				VM_STATUS_FAILURE on failure
 				VM_STATUS_ERROR_INVALID_PARAMETER if fd or filename are NULL
 		*/
-		if (fd == NULL || filename == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
 		MachineSuspendSignals(&signalState);
+		if (fd == NULL || filename == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;}
+
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -409,7 +447,10 @@ extern "C" {
 		MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
-		if (*fd < 0) {return VM_STATUS_FAILURE;}
+		if (*fd < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_FAILURE;
+		}
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -433,7 +474,10 @@ extern "C" {
 		schedule(0);
 		MachineResumeSignals(&signalState);
 
-		if (result < 0) {return VM_STATUS_FAILURE;}
+		if (result < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_FAILURE;
+		}
 
 
 		return VM_STATUS_SUCCESS;
@@ -450,9 +494,12 @@ extern "C" {
 				VM_STATUS_FAILURE on failure
 				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
 		*/
-		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
 		MachineSuspendSignals(&signalState);
+		if (data == NULL || length == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
+
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -462,7 +509,10 @@ extern "C" {
 		MachineFileRead(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
-		if (*length < 0) {return VM_STATUS_FAILURE;}
+		if (*length < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_FAILURE;
+		}
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -478,9 +528,12 @@ extern "C" {
 				VM_STATUS_FAILURE on failure
 				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
 		*/
-		if (data == NULL || length == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
 		MachineSuspendSignals(&signalState);
+		if (data == NULL || length == NULL) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
+
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -489,7 +542,10 @@ extern "C" {
 		MachineFileWrite(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
-		if (*length < 0) {return VM_STATUS_FAILURE;}
+		if (*length < 0) {
+			MachineResumeSignals(&signalState);
+			return VM_STATUS_FAILURE;
+		}
 
 		return VM_STATUS_SUCCESS;
 	}
