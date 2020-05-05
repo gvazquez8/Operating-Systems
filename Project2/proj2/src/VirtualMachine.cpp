@@ -86,10 +86,10 @@ extern "C" {
 				std::cout << "HIGH THREADS: ";
 			}
 			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
-				unsigned int id = readyThreads[j].front();
-				std::cout <<  readyThreads[j].front() << " ";
-				readyThreads[j].pop();
-				readyThreads[j].push(id);
+				unsigned int id = readyThreads[i].front();
+				std::cout <<  readyThreads[i].front() << " ";
+				readyThreads[i].pop();
+				readyThreads[i].push(id);
 			}
 			std::cout << std::endl;
 		}
@@ -313,17 +313,6 @@ extern "C" {
 			std::cout << "Activating thread: " << thread << "\n";
 			std::cout << "threadHolder[thread].id" << threadHolder[thread].id << "\n";
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
-			readyThreads[VM_THREAD_PRIORITY_NORMAL-1].push(2);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-			readyThreads[threadHolder[thread].prio-1].push(3);
-
 		}
 
 		MachineResumeSignals(&signalState);
