@@ -311,6 +311,7 @@ extern "C" {
 			dispatch(thread);
 		} else {
 			std::cout << "Activating thread: " << thread << "\n";
+			std::cout << "threadHolder[thread].id" << threadHolder[thread].id << "\n";
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 		}
 
