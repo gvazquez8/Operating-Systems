@@ -76,20 +76,6 @@ extern "C" {
 	}
 
 	void schedule(int scheduleEqualPrio) {
-
-		std::cout << "schedule begin" << std::endl;
-		for (unsigned int i = 0; i < threadHolder.size(); i++) {
-			std::cout << "Thread ID: " << threadHolder[i].id << std::endl;
-			std::cout << "Thread state: " << threadHolder[i].state << std::endl;
-			std::cout << "Thread priority: " << threadHolder[i].prio << std::endl;
-			std::cout << "Thread entry: " << &threadHolder[i].entry << std::endl;
-			std::cout << "Thread args: " << &threadHolder[i].args << std::endl;
-			std::cout << "Thread cntx: " << &threadHolder[i].cntx << std::endl;
-			std::cout << "Thread memsize: " << threadHolder[i].memsize << std::endl;
-			std::cout << "Thread stackaddr: " << threadHolder[i].stackaddr << std::endl;
-			std::cout << "Thread sleepCountdown: " << threadHolder[i].sleepCountdown << std::endl;
-		}
-		std::cout << "schedule end" << std::endl;
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
