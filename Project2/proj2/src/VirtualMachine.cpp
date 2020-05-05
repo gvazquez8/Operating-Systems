@@ -378,10 +378,8 @@ extern "C" {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 		*(args->resultPtr) = result;
 
-		TVMThreadID prev = currThread;
-		currThread = args->id;
-		threadHolder[prev].state = VM_THREAD_STATE_READY;
-		dispatch(currThread);
+		threadHolder[currThread].state = VM_THREAD_STATE_READY;
+		dispatch(args->id);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
