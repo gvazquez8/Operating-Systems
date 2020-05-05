@@ -141,7 +141,9 @@ extern "C" {
 		thread->sleepCountdown = 0;
 		threadHolder.push_back(*thread);
 
-
+		std::cout << "testing context of main" << std::endl;
+		MachineContextSwitch(&threadHolder[1].cntx, &threadHolder[1].cntx);
+		std::cout << "all good!" << std::endl;
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
