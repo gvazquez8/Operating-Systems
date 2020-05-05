@@ -33,7 +33,7 @@ extern "C" {
 	// tickCount stores the number of ticks since start
 	volatile TVMTick totalTickCount = 0;
 	// Signal State
-	volatile TMachineSignalState signalState;
+	TMachineSignalState signalState;
 
 	// Struct for FileOpen
 	struct callBackDataStorage {
