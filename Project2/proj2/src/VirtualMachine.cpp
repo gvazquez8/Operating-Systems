@@ -275,6 +275,7 @@ extern "C" {
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
+			std::cout << "Dispatching thread: " << thread << " from " << currThread << " activate" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			dispatch(thread);
 		}
