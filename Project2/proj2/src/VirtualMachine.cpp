@@ -110,6 +110,7 @@ extern "C" {
 	}
 
 	void idle(void* param) {
+		MachineResumeSignals(&signalState);
 		while(true) {
 		}
 	}
