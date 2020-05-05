@@ -54,14 +54,14 @@ extern "C" {
 		int sleepCountdown;
 	};
 
-	TVMThreadID currThread = 1;
+	volatile TVMThreadID currThread = 1;
 
-	volatile std::vector<Thread> threadHolder;
+	std::vector<Thread> threadHolder;
 	// 0 = LOW, 1 = NORMAL, 2 = HIGH
-	volatile std::vector<std::queue<unsigned int>> readyThreads;
-	volatile std::vector<unsigned int> sleepingThreads;
+	std::vector<std::queue<unsigned int>> readyThreads;
+	std::vector<unsigned int> sleepingThreads;
 
-	volatile std::vector<unsigned int> oldStates;
+	std::vector<unsigned int> oldStates;
 
 	void dispatch(TVMThreadID next) {
 		TVMThreadID prev = currThread;
