@@ -86,7 +86,7 @@ extern "C" {
 				std::cout << "HIGH THREADS: ";
 			}
 			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
-				TVMThreadID id = readyThreads[j].front();
+				unsigned int id = readyThreads[j].front();
 				readyThreads[j].pop();
 				readyThreads[j].push(id);
 				std::cout << id << " ";
