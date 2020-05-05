@@ -64,22 +64,22 @@ extern "C" {
 	void dispatch(TVMThreadID next) {
 		TVMThreadID prev = currThread;
 		currThread = next;
-		for (unsigned int i = 0; i < 3; i++) {
-			if (i == 0) {
-				std::cout << "LOW THREADS: ";
-			} else if (i == 1) {
-				std::cout << "NORMAL THREADS: ";
-			} else if (i == 2) {
-				std::cout << "HIGH THREADS: ";
-			}
-			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
-				unsigned int id = readyThreads[i].front();
-				std::cout <<  readyThreads[i].front() << " ";
-				readyThreads[i].pop();
-				readyThreads[i].push(id);
-			}
-			std::cout << std::endl;
-		}
+		// for (unsigned int i = 0; i < 3; i++) {
+		// 	if (i == 0) {
+		// 		std::cout << "LOW THREADS: ";
+		// 	} else if (i == 1) {
+		// 		std::cout << "NORMAL THREADS: ";
+		// 	} else if (i == 2) {
+		// 		std::cout << "HIGH THREADS: ";
+		// 	}
+		// 	for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
+		// 		unsigned int id = readyThreads[i].front();
+		// 		std::cout <<  readyThreads[i].front() << " ";
+		// 		readyThreads[i].pop();
+		// 		readyThreads[i].push(id);
+		// 	}
+		// 	std::cout << std::endl;
+		// }
 		std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
@@ -429,8 +429,12 @@ extern "C" {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 		*(args->resultPtr) = result;
 
-		threadHolder[currThread].state = VM_THREAD_STATE_READY;
-		dispatch(args->id);
+		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
+			return;
+		} else {
+			threadHolder[currThread].state = VM_THREAD_STATE_READY;
+			dispatch(args->id);
+		}
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
