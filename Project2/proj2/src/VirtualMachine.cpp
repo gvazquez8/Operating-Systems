@@ -79,29 +79,29 @@ extern "C" {
 
 		TVMThreadID nextThread;
 
-		std::cout << "LOW PRIORITY QUEUE:" << std::endl;
-		for (int i = 0; i < readyThreads[0].size(); i++) {
-			TVMThreadID tid = readyThreads[0].front();
-			std::cout << "Thread ID: " << tid << std::endl;
-			readyThreads[0].pop();
-			readyThreads[0].push(tid);
-		}
+		// std::cout << "LOW PRIORITY QUEUE:" << std::endl;
+		// for (int i = 0; i < readyThreads[0].size(); i++) {
+		// 	TVMThreadID tid = readyThreads[0].front();
+		// 	std::cout << "Thread ID: " << tid << std::endl;
+		// 	readyThreads[0].pop();
+		// 	readyThreads[0].push(tid);
+		// }
 
-		std::cout << "NORMAL PRIORITY QUEUE:" << std::endl;
-		for (int i = 0; i < readyThreads[1].size(); i++) {
-			TVMThreadID tid = readyThreads[1].front();
-			std::cout << "Thread ID: " << tid << std::endl;
-			readyThreads[1].pop();
-			readyThreads[1].push(tid);
-		}
+		// std::cout << "NORMAL PRIORITY QUEUE:" << std::endl;
+		// for (int i = 0; i < readyThreads[1].size(); i++) {
+		// 	TVMThreadID tid = readyThreads[1].front();
+		// 	std::cout << "Thread ID: " << tid << std::endl;
+		// 	readyThreads[1].pop();
+		// 	readyThreads[1].push(tid);
+		// }
 
-		std::cout << "HIGH PRIORITY QUEUE:" << std::endl;
-		for (int i = 0; i < readyThreads[2].size(); i++) {
-			TVMThreadID tid = readyThreads[2].front();
-			std::cout << "Thread ID: " << tid << std::endl;
-			readyThreads[2].pop();
-			readyThreads[2].push(tid);
-		}
+		// std::cout << "HIGH PRIORITY QUEUE:" << std::endl;
+		// for (int i = 0; i < readyThreads[2].size(); i++) {
+		// 	TVMThreadID tid = readyThreads[2].front();
+		// 	std::cout << "Thread ID: " << tid << std::endl;
+		// 	readyThreads[2].pop();
+		// 	readyThreads[2].push(tid);
+		// }
 
 
 		if (scheduleEqualPrio == 1) {
