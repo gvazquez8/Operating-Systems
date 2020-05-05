@@ -78,6 +78,19 @@ extern "C" {
 		TVMThreadID nextThread;
 
 		for (unsigned int i = 0; i < 3; i++) {
+			if (i == 0) {
+				std::cout << "LOW THREADS: "
+			}
+			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
+				TVMThreadID id = readyThreads[i].front();
+				readyThreads[i].pop();
+				readyThreads[i].push(id);
+				std::cout << id << " ";
+			}
+			std::cout << std::endl;
+		}
+
+		for (unsigned int i = 0; i < 3; i++) {
 			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
 				TVMThreadID id = readyThreads[i].front();
 				readyThreads[i].pop();
@@ -86,6 +99,7 @@ extern "C" {
 				}
 			}
 		}
+
 		if (scheduleEqualPrio == 1) {
 			if (readyThreads[threadHolder[currThread].prio-1].size() != 0) {
 				nextThread = readyThreads[threadHolder[currThread].prio-1].front();
