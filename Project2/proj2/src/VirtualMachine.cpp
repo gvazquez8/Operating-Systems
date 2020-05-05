@@ -76,7 +76,7 @@ extern "C" {
 	}
 
 	void schedule(int scheduleEqualPrio) {
-
+		MachineResumeSignals(&signalState);
 		for (unsigned int i = 0; i < readyThreads.size(); i++) {
 			switch(i) {
 				case 0:	std::cout << "LOW THREADS: " << std::endl;
