@@ -126,13 +126,21 @@ extern "C" {
 		// create the idle and main thread;
 		TVMThreadID idleID, mainID;
 
-		VMThreadCreate(idle, NULL, 0x10000000, VM_THREAD_PRIORITY_LOW, &idleID);
-		VMThreadCreate((TVMThreadEntry)VMMain, argv, 0x10000000, VM_THREAD_PRIORITY_NORMAL, &mainID);
-
+		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
 		readyThreads[threadHolder[idleID].prio-1].push(threadHolder[idleID].id);
-		threadHolder[mainID].state = VM_THREAD_STATE_RUNNING;
 		MachineContextCreate(&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
+
+		// Create the main thread
+		Thread *thread = new Thread();
+		thread->state = VM_THREAD_STATE_RUNNING;
+		thread->entry = (TVMThreadEntry) TVMMainEntry;
+		thread->args = argv;
+		thread->prio = VM_THREAD_PRIORITY_NORMAL;
+		thread->id = threadHolder.size();
+		thread->sleepCountdown = 0;
+		threadHolder.push_back(*thread);
+
 
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
@@ -305,7 +313,10 @@ extern "C" {
 		}
 
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
-		schedule(0);
+		if (thread == currThread) {
+			schedule(0);
+		}
+
 		MachineResumeSignals(&signalState);
 
 		return VM_STATUS_SUCCESS;
