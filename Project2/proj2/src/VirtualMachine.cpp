@@ -152,7 +152,9 @@ extern "C" {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				if (threadHolder[sleepingThreads[i]].prio > threadHolder[currThread].prio) {
+					MachineSuspendSignals(&signalState);
 					dispatch(sleepingThreads[i]);
+					MachineSuspendSignals(&signalState);
 				}
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
