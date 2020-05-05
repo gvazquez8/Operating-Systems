@@ -64,10 +64,11 @@ extern "C" {
 	void dispatch(TVMThreadID next) {
 		TVMThreadID prev = currThread;
 		currThread = next;
+
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
-		std::cout << "Going from " << prev << " to " << next << std::endl;
+
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 
 		MachineContextSwitch((SMachineContextRef)&threadHolder[prev].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
@@ -232,7 +233,6 @@ extern "C" {
 		thread->args = param;
 		thread->memsize = memsize;
 		thread->prio = prio;
-		thread->cntx = new SMachineContext();
 		thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
 		thread->id = threadHolder.size();
 		*tid = thread->id;
@@ -276,7 +276,7 @@ extern "C" {
 		MachineSuspendSignals(&signalState);
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		std::cout << "Activating Thread: " << thread << std::endl;
-		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
+		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 		std::cout << "Activated Thread: " << thread << std::endl;
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
 			std::cout << "Dispatching thread: " << thread << " from " << currThread << " activate" << std::endl;
