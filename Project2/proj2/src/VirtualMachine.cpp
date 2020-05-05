@@ -315,6 +315,14 @@ extern "C" {
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 			readyThreads[VM_THREAD_PRIORITY_NORMAL-1].push(2);
 			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+			readyThreads[threadHolder[thread].prio-1].push(3);
 
 		}
 
