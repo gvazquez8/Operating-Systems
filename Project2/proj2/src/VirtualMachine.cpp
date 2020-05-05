@@ -313,6 +313,9 @@ extern "C" {
 			std::cout << "Activating thread: " << thread << "\n";
 			std::cout << "threadHolder[thread].id" << threadHolder[thread].id << "\n";
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
+			readyThreads[VM_THREAD_PRIORITY_NORMAL-1].push(2);
+			readyThreads[threadHolder[thread].prio-1].push(3);
+
 		}
 
 		MachineResumeSignals(&signalState);
