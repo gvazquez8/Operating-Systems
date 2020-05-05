@@ -70,13 +70,12 @@ extern "C" {
 		}
 
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
-
+		MachineResumeSignals(&signalState);
 		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 
 	}
 
 	void schedule(int scheduleEqualPrio) {
-		MachineResumeSignals(&signalState);
 
 		TVMThreadID nextThread;
 
