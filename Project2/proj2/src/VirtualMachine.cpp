@@ -160,6 +160,7 @@ extern "C" {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				if (threadHolder[sleepingThreads[i]].prio > threadHolder[currThread].prio) {
 					dispatch(sleepingThreads[i]);
+					break;
 
 				}
 			} else {
