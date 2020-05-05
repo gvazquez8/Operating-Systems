@@ -244,7 +244,7 @@ extern "C" {
 		    	VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
 		*/
 		if (entry == NULL || tid == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
+		MachineSuspendSignals(&signalState);
 		Thread *thread = new Thread();
 		thread->state = VM_THREAD_STATE_DEAD;
 		thread->entry = entry;
@@ -256,7 +256,7 @@ extern "C" {
 		*tid = thread->id;
 		thread->sleepCountdown = 0;
 		threadHolder.push_back(*thread);
-
+		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -272,7 +272,10 @@ extern "C" {
 		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 		if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
 
+		MachineSuspendSignals(&signalState);
 		delete &threadHolder[thread];
+		MachineResumeSignals(&signalState);
+
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -287,6 +290,7 @@ extern "C" {
 		*/
 		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 
+		MachineSuspendSignals(&signalState);
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 
 		MachineContextCreate((SMachineContextRef)&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
@@ -294,6 +298,7 @@ extern "C" {
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
 			schedule(0);
 		}
+		MachineResumeSignals(&signalState);
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -309,9 +314,11 @@ extern "C" {
 		*/
 		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 		if (threadHolder[thread].state == VM_THREAD_STATE_DEAD) {return VM_STATUS_ERROR_INVALID_STATE;}
-		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 
+		MachineSuspendSignals(&signalState);
+		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		schedule(0);
+		MachineResumeSignals(&signalState);
 
 		return VM_STATUS_SUCCESS;
 	}
@@ -325,7 +332,11 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
 		*/
 		if (threadRef == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
+
+		MachineSuspendSignals(&signalState);
 		*threadRef = currThread;
+		MachineResumeSignals(&signalState);
+
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -341,9 +352,11 @@ extern "C" {
 		*/
 		if (stateref == NULL) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
+		MachineSuspendSignals(&signalState);
 		if (thread > threadHolder.size()-1 || thread < 0) {return VM_STATUS_ERROR_INVALID_ID;}
 
 		*stateref = threadHolder[thread].state;
+		MachineResumeSignals(&signalState);
 		return VM_STATUS_SUCCESS;
 	}
 
@@ -360,7 +373,7 @@ extern "C" {
 		*/
 
 		if (tick == VM_TIMEOUT_INFINITE) {return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
+		MachineSuspendSignals(&signalState);
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
 			schedule(1);
 		} else {
@@ -369,6 +382,7 @@ extern "C" {
 			sleepingThreads.push_back(threadHolder[currThread].id);
 			schedule(0);
 		}
+		MachineResumeSignals(&signalState);
 
 		return VM_STATUS_SUCCESS;
 	}
