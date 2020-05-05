@@ -157,6 +157,8 @@ extern "C" {
 					dispatch(sleepingThreads[i]);
 					break;
 
+				} else {
+					readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
 				}
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
