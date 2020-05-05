@@ -310,6 +310,7 @@ extern "C" {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			dispatch(thread);
 		} else {
+			std::cout << "Activating thread: " << thread << "\n";
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 		}
 
