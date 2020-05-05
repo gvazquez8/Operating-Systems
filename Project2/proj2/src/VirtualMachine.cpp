@@ -61,8 +61,6 @@ extern "C" {
 	std::vector<std::queue<unsigned int>> readyThreads;
 	std::vector<unsigned int> sleepingThreads;
 
-	std::vector<unsigned int> oldStates;
-
 	void dispatch(TVMThreadID next) {
 		TVMThreadID prev = currThread;
 		currThread = next;
@@ -75,24 +73,6 @@ extern "C" {
 	}
 
 	void schedule(int scheduleEqualPrio) {
-		if (oldStates.size() < threadHolder.size()) {
-			int oldSize = oldStates.size();
-			// make vector longer to equal size of num threads
-			oldStates.resize(threadHolder.size());
-			for (unsigned int i = oldSize; i < threadHolder.size(); i++) {
-				oldStates[i] = threadHolder[i].state;
-				if (threadHolder[i].state == VM_THREAD_STATE_READY) {
-					 readyThreads[threadHolder[i].prio-1].push(threadHolder[i].id);
-				}
-			}
-		}
-		for (unsigned int i = 0; i < threadHolder.size(); i++) {
-			if ((oldStates[i] != VM_THREAD_STATE_READY) && (threadHolder[i].state == VM_THREAD_STATE_READY)) {
-				readyThreads[threadHolder[i].prio-1].push(threadHolder[i].id);
-			}
-			oldStates[i] = threadHolder[i].state;
-		}
-
 
 		for (unsigned int i = 0; i < readyThreads.size(); i++) {
 			switch(i) {
@@ -168,11 +148,6 @@ extern "C" {
 		threadHolder[mainID].state = VM_THREAD_STATE_RUNNING;
 		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 
-		// Store the old states. Will be used to determine if a thread needs to be push to readyQueue
-		oldStates.resize(2);
-		oldStates[idleID] = threadHolder[idleID].state;
-		oldStates[mainID] = threadHolder[mainID].state;
-
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
 		MachineRequestAlarm(tickus, timerCallback, NULL);
@@ -188,12 +163,14 @@ extern "C" {
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
+				if (threadHolder[sleepingThreads[i]].prio > threadHolder[currThread].prio) {
 				TVMThreadID prv = currThread;
 				currThread = sleepingThreads[i];
 				threadHolder[prv].state = VM_THREAD_STATE_READY;
 				threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 				sleepingThreads.erase(sleepingThreads.begin()+i);
 				MachineContextSwitch((SMachineContextRef)&threadHolder[prv].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
+				}
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
