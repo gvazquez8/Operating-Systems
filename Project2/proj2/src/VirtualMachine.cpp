@@ -79,7 +79,7 @@ extern "C" {
 
 		for (unsigned int i = 0; i < 3; i++) {
 			if (i == 0) {
-				std::cout << "LOW THREADS: "
+				std::cout << "LOW THREADS: ";
 			}
 			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
 				TVMThreadID id = readyThreads[i].front();
