@@ -85,10 +85,10 @@ extern "C" {
 			} else if (i == 2) {
 				std::cout << "HIGH THREADS: ";
 			}
-			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
-				TVMThreadID id = readyThreads[i].front();
-				readyThreads[i].pop();
-				readyThreads[i].push(id);
+			for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
+				TVMThreadID id = readyThreads[j].front();
+				readyThreads[j].pop();
+				readyThreads[j].push(id);
 				std::cout << id << " ";
 			}
 			std::cout << std::endl;
