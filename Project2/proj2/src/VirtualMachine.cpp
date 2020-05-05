@@ -106,7 +106,6 @@ extern "C" {
 	}
 
 	void skeleton(void* param) {
-		// std::cout << "in skeleton with id: " << currThread << std::endl;
 		threadHolder[currThread].entry(threadHolder[currThread].args);
 		VMThreadTerminate(currThread);
 	}
@@ -314,6 +313,7 @@ extern "C" {
 
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		if (thread == currThread) {
+			std::cout << "Terminating thread " << threadHolder[thread].id << std::endl;
 			schedule(0);
 		}
 
