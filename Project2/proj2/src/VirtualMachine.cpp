@@ -433,6 +433,7 @@ extern "C" {
 			return;
 		} else {
 			std::cout << "Inside of file callback: currThread = " << currThread << "\n";
+			std::cout << "Inside of file callback: args->id = " << args->id << "\n";
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			dispatch(args->id);
 		}
