@@ -131,8 +131,8 @@ extern "C" {
 	}
 
 	void idle(void* param) {
-		std::cout << "In IDLE" << std::endl;
 		while(true) {
+			std::cout << "In IDLE";
 		}
 	}
 
