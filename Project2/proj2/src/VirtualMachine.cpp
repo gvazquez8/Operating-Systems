@@ -71,7 +71,7 @@ extern "C" {
 
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 
-		MachineContextSwitch((SMachineContextRef)&threadHolder[prev].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
+		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 
 	}
 
@@ -150,7 +150,7 @@ extern "C" {
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
 		readyThreads[threadHolder[idleID].prio-1].push(threadHolder[idleID].id);
 		threadHolder[mainID].state = VM_THREAD_STATE_RUNNING;
-		MachineContextCreate((SMachineContextRef)&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
+		MachineContextCreate(&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 
 		// create alarm for tick incrementing
 		useconds_t tickus = tickms * 1000;
@@ -173,7 +173,7 @@ extern "C" {
 				threadHolder[prv].state = VM_THREAD_STATE_READY;
 				threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 				sleepingThreads.erase(sleepingThreads.begin()+i);
-				MachineContextSwitch((SMachineContextRef)&threadHolder[prv].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
+				MachineContextSwitch(&threadHolder[prv].cntx, &threadHolder[currThread].cntx);
 				}
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
@@ -382,7 +382,7 @@ extern "C" {
 		TVMThreadID prev = currThread;
 		currThread = args->id;
 		threadHolder[prev].state = VM_THREAD_STATE_READY;
-		MachineContextSwitch((SMachineContextRef)&threadHolder[prev].cntx, (SMachineContextRef)&threadHolder[currThread].cntx);
+		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
