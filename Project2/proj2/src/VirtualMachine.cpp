@@ -440,8 +440,9 @@ extern "C" {
 			return;
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
-
+				std::cout << "MAKING THREAD " << threadHolder[args->id].id
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
+				threadHolder[args->id].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[args->id].prio-1].push(args->id);
 				schedule(0);
 			}
