@@ -169,6 +169,7 @@ extern "C" {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
 		}
+		std::cout << "In timerCallback, currThread is " << currThread << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_READY;
 		schedule(0);
 		MachineResumeSignals(&signalState);
