@@ -290,14 +290,10 @@ extern "C" {
 
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
+		readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
-			threadHolder[currThread].state = VM_THREAD_STATE_READY;
-			readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
 			schedule(0);
-		} else {
-			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 		}
-
 		MachineResumeSignals(&signalState);
 
 		return VM_STATUS_SUCCESS;
