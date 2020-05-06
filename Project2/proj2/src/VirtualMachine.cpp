@@ -402,15 +402,11 @@ extern "C" {
                 }
                 if (tick == VM_TIMEOUT_IMMEDIATE) {
                         threadHolder[currThread].state = VM_THREAD_STATE_READY;
-                        // std::cout << "IN SLEEP\n";
-                        // std::cout << "Making thread " << currThread << " READY" << std::endl;
                         readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
                         schedule(1);
                 } else {
                         threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
                         threadHolder[currThread].sleepCountdown = tick;
-                        // std::cout << "IN SLEEP\n";
-                        // std::cout << "Making thread " << currThread << " WAITING" << std::endl;
                         sleepingThreads.push_back(threadHolder[currThread].id);
                         schedule(0);
                 }
@@ -427,9 +423,6 @@ extern "C" {
                         return;
                 } else {
                         if (threadHolder[args->id].state > threadHolder[currThread].state) {
-                                // std::cout << "FILE CALLBACK\n";
-                                // std::cout << "Making thread " << currThread << " READY" << std::endl;
-                                // std::cout << "Making thread " << args->id << " RUNNING. ITS PREV STATE WAS" << threadHolder[args->id].state << std::endl;
                                 threadHolder[currThread].state = VM_THREAD_STATE_READY;
                                 readyThreads[threadHolder[args->id].prio-1].push(args->id);
                                 schedule(0);
@@ -456,11 +449,11 @@ extern "C" {
 
                 threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-                callBackDataStorage cb;
-                cb.id = currThread;
-                cb.resultPtr = fd;
+				callBackDataStorage *cb = new callBackDataStorage();
+				cb->id = currThread;
+				cb->resultPtr = fd;
 
-                MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
+				MachineFileOpen(filename, flags, mode, &fileCallBack, cb);
                 schedule(0);
                 MachineResumeSignals(&signalState);
                 if (*fd < 0) {
@@ -482,11 +475,11 @@ extern "C" {
 
                 MachineSuspendSignals(&signalState);
                 threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
-                int result;
-                callBackDataStorage cb;
-                cb.id = currThread;
-                cb.resultPtr = (int*)&result;
-                MachineFileClose(fd, &fileCallBack, &cb);
+				int result;
+				callBackDataStorage *cb = new callBackDataStorage();
+				cb->id = currThread;
+				cb->resultPtr = (int*)&result;
+				MachineFileClose(fd, &fileCallBack, cb);
                 schedule(0);
                 MachineResumeSignals(&signalState);
 
@@ -518,11 +511,11 @@ extern "C" {
 
                 threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-                callBackDataStorage cb;
-                cb.id = currThread;
-                cb.resultPtr = length;
+				callBackDataStorage *cb = new callBackDataStorage();;
+				cb->id = currThread;
+				cb->resultPtr = length;
 
-                MachineFileRead(fd, data, *length, &fileCallBack, &cb);
+				MachineFileRead(fd, data, *length, &fileCallBack, cb);
                 schedule(0);
                 MachineResumeSignals(&signalState);
                 if (*length < 0) {
@@ -552,10 +545,10 @@ extern "C" {
 
                 threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-                callBackDataStorage cb;
-                cb.id = currThread;
-                cb.resultPtr = length;
-                MachineFileWrite(fd, data, *length, &fileCallBack, &cb);
+				callBackDataStorage *cb = new callBackDataStorage();
+				cb->id = currThread;
+				cb->resultPtr = length;
+				MachineFileWrite(fd, data, *length, &fileCallBack, cb);
                 schedule(0);
                 MachineResumeSignals(&signalState);
                 if (*length < 0) {
@@ -583,22 +576,22 @@ extern "C" {
 
                 threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-                callBackDataStorage cb;
-                cb.id = currThread;
-                cb.resultPtr = tempPointer;
+                callBackDataStorage *cb = new callBackDataStorage();
+				cb->id = currThread;
+				cb->resultPtr = tempPointer;
 
-                MachineFileSeek(fd, offset, whence, &fileCallBack, &cb);
-                schedule(0);
+				MachineFileSeek(fd, offset, whence, &fileCallBack, cb);
+				schedule(0);
 
-                if (newoffset != NULL) {
-                        *newoffset = *tempPointer;
-                        MachineResumeSignals(&signalState);
-                        if (*newoffset < 0) {return VM_STATUS_FAILURE;}
-                }
-                else {
-                        MachineResumeSignals(&signalState);
-                        if (*tempPointer < 0) {return VM_STATUS_FAILURE;}
-                }
+				if (newoffset != NULL) {
+					*newoffset = *tempPointer;
+					MachineResumeSignals(&signalState);
+					if (*newoffset < 0) {return VM_STATUS_FAILURE;}
+				}
+				else {
+					MachineResumeSignals(&signalState);
+					if (*tempPointer < 0) {return VM_STATUS_FAILURE;}
+				}
 
                 return VM_STATUS_SUCCESS;
         }
