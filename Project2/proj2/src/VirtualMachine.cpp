@@ -419,6 +419,7 @@ extern "C" {
 		if (args->resultPtr == NULL) {
 			std::cout << "POINTER IS NULL!" << std::endl;
 		}
+
 		*(args->resultPtr) = result;
 
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
@@ -543,7 +544,7 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
 		*/
 		MachineSuspendSignals(&signalState);
-		if (data == NULL || length == NULL) {
+		if (data == NULL || length == NULL || fd == NULL) {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
