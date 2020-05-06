@@ -84,7 +84,7 @@ extern "C" {
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
-		if (threadHolder.size() == 3) {
+		if (threadHolder.size() > 3) {
 			std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
 		}
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
