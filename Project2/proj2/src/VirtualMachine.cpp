@@ -430,11 +430,9 @@ extern "C" {
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
-			// std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
+			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 			threadHolder[currThread].sleepCountdown = tick;
-			std::cout << "IN SLEEP\n";
-			std::cout << "Making thread " << currThread << " -> WAITING" << std::endl;
 			sleepingThreads.push_back(threadHolder[currThread].id);
 			schedule(0);
 		}
