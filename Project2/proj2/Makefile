@@ -1,4 +1,4 @@
-AR=ar 	 	    		
+AR=ar
 AS=as
 CC=gcc
 CPP=cpp
@@ -20,16 +20,16 @@ OBJS=$(OBJ_DIR)/Machine.o \
      $(OBJ_DIR)/main.o
 
 MODOBJS=$(OBJ_DIR)/module.o
-     
-     
-#DEBUG_MODE=TRUE
+
+
+DEBUG_MODE=TRUE
 UNAME := $(shell uname)
 
 ifdef DEBUG_MODE
 DEFINES += -DDEBUG
 endif
 
-INCLUDES += -I $(SRC_DIR) 
+INCLUDES += -I $(SRC_DIR)
 LIBRARIES = -ldl
 
 CFLAGS += -Wall -U_FORTIFY_SOURCE $(INCLUDES) $(DEFINES)
@@ -44,19 +44,19 @@ APPCFLAGS += -O3
 endif
 
 ifeq ($(UNAME), Darwin)
-LDFLAGS = $(DEFINES) $(INCLUDES) $(LIBRARIES) 
+LDFLAGS = $(DEFINES) $(INCLUDES) $(LIBRARIES)
 APPLDFLAGS += $(DEFINES) $(INCLUDES) -shared -rdynamic -flat_namespace -undefined suppress
 else
 LDFLAGS = $(DEFINES) $(INCLUDES) $(LIBRARIES) -Wl,-E
 APPLDFLAGS += $(DEFINES) $(INCLUDES) -shared -rdynamic -Wl,-E
 endif
 
-all: directories $(BIN_DIR)/vm 
+all: directories $(BIN_DIR)/vm
 apps: directories $(BIN_DIR)/hello.so $(BIN_DIR)/sleep.so $(BIN_DIR)/file.so $(BIN_DIR)/thread.so $(BIN_DIR)/preempt.so
 
 $(BIN_DIR)/vm: $(OBJS)
 	$(CXX) $(OBJS) $(LDFLAGS) -o $(BIN_DIR)/vm
-	
+
 FORCE: ;
 
 .PRECIOUS: $(APPOBJ_DIR)/%.o
@@ -69,31 +69,31 @@ $(BIN_DIR)/%.so: $(APPOBJ_DIR)/%.o
 $(APPOBJ_DIR)/%.o : $(APPSRC_DIR)/%.c
 	$(CC) -c $(APPCFLAGS) $< -o $@
 
-$(APPOBJ_DIR)/%.o : $(APPSRC_DIR)/%.cpp 
+$(APPOBJ_DIR)/%.o : $(APPSRC_DIR)/%.cpp
 	$(CXX) -c $(APPCFLAGS) $(CPPFLAGS) $< -o $@
 
-$(OBJ_DIR)/Machine.o : $(SRC_DIR)/Machine.cpp 
+$(OBJ_DIR)/Machine.o : $(SRC_DIR)/Machine.cpp
 	$(CXX) -c $(CFLAGS) $(CPPFLAGS) -O0 $(SRC_DIR)/Machine.cpp -o $(OBJ_DIR)/Machine.o
-	
+
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp 
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.cpp
 	$(CXX) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
-	
+
 .PHONY: directories
 directories:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(BIN_DIR)
 	mkdir -p $(APPOBJ_DIR)
 
-	
+
 .PHONY: clean_directories
 clean_directories:
 	rm -rf $(BIN_DIR)
 	rm -rf $(OBJ_DIR)
 	rm -rf $(APPOBJ_DIR)
-	
+
 .PHONY: clean
 clean: clean_directories
