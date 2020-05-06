@@ -180,7 +180,7 @@ extern "C" {
 		std::cout << "IN TIMER CALLBACK" << std::endl;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
-				std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
+				// std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
 				sleepingThreads.erase(sleepingThreads.begin()+i);
