@@ -120,8 +120,8 @@ extern "C" {
 			readyThreads[1].pop();
 		} else {
 			nextThread = readyThreads[0].front();
-			// std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
-			// std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
+			std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
+			std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
 			readyThreads[0].pop();
 		}
 		dispatch(nextThread);
