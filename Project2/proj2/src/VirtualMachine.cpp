@@ -80,11 +80,13 @@ extern "C" {
 		// 	}
 		// 	std::cout << std::endl;
 		// }
-		// std::cout << "Going from " << prev << " to " << next << std::endl;
+		std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
-
+		if (threadHolder.size() == 2) {
+			std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
+		}
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 
