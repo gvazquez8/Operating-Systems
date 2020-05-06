@@ -451,9 +451,7 @@ extern "C" {
 			return;
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
-				// std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
-				std::cout << "THREAD " << threadHolder[args->id].id << ": " << threadHolder[args->id].state << " -> READY" << std::endl;
 				threadHolder[args->id].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[args->id].prio-1].push(args->id);
 				schedule(0);
@@ -573,8 +571,8 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
-		// std::cout << "IN FILE WRITE" << std::endl;
-		// std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
+		std::cout << "IN FILE WRITE" << std::endl;
+		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
