@@ -66,7 +66,7 @@ extern "C" {
 		currThread = next;
 
 
-		std::cout << "Going from " << prev << " to " << next << std::endl;
+		// std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
