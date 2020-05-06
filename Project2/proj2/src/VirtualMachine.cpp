@@ -81,7 +81,6 @@ extern "C" {
 		// 	std::cout << std::endl;
 		// }
 		std::cout << "Going from " << prev << " to " << next << std::endl;
-		if (threadHolder)
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
@@ -428,8 +427,10 @@ extern "C" {
 		} else {
 			std::cout << "Inside of file callback: currThread = " << currThread << "\n";
 			std::cout << "Inside of file callback: args->id = " << args->id << "\n";
-			threadHolder[currThread].state = VM_THREAD_STATE_READY;
-			dispatch(args->id);
+			if (threadHolder[args->id].state > threadHolder[currThread].state) {
+				threadHolder[currThread].state = VM_THREAD_STATE_READY;
+				dispatch(args->id);
+			}
 		}
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
