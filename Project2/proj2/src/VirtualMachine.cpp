@@ -169,10 +169,10 @@ extern "C" {
                                 threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
                         }
                 }
-                // if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
-                //         threadHolder[currThread].state = VM_THREAD_STATE_READY;
-                //         readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
-                // }
+                if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
+                        threadHolder[currThread].state = VM_THREAD_STATE_READY;
+                        readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
+                }
                 schedule(0);
                 MachineResumeSignals(&signalState);
         }
