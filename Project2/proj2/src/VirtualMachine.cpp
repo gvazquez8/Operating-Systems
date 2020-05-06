@@ -132,7 +132,9 @@ extern "C" {
 
 	void skeleton(void* param) {
 		threadHolder[currThread].entry(threadHolder[currThread].args);
+		MachineSuspendSignals(&signalState);
 		VMThreadTerminate(currThread);
+		MachineResumeSignals(&signalState);
 	}
 
 	void idle(void* param) {
