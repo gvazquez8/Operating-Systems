@@ -88,6 +88,10 @@ extern "C" {
 			}
 		}
 
+		std::cout << "LOW SIZE " << readyThreads[0].size() << std::endl;
+		std::cout << "NORM SIZE " << readyThreads[1].size() << std::endl;
+		std::cout << "HIGH SIZE " << readyThreads[2].size() << std::endl;
+
 		if (readyThreads[0].empty() && readyThreads[1].empty() && readyThreads[2].empty()) {
 			std::cout << "EMPTY QS" << std::endl;
 			nextThread = currThread;
