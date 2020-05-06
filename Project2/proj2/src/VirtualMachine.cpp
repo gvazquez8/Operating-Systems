@@ -62,10 +62,10 @@ extern "C" {
 	std::vector<unsigned int> sleepingThreads;
 
 	void dispatch(TVMThreadID next) {
+		std::cout << "current Thread " << currThread << std::endl;
 		TVMThreadID prev = currThread;
 		currThread = next;
 
-		std::cout << "current Thread " << currThread << std::endl;
 
 		std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
