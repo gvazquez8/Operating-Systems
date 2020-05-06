@@ -305,7 +305,7 @@ extern "C" {
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
-			dispatch(thread);
+			schedule(0);
 		} else {
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 		}
@@ -409,6 +409,8 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
+			threadHolder[currThread].state = VM_THREAD_STATE_READY;
+			readyThreads[threadHolder[currThread].prio-1].push(currThread);
 			schedule(1);
 		} else {
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
@@ -430,7 +432,8 @@ extern "C" {
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
-				dispatch(args->id);
+				readyThreads[threadHolder[args->id].prio-1].push(args->id);
+				schedule(0);
 			}
 		}
 	}
