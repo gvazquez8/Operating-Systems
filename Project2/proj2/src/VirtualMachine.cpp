@@ -427,9 +427,9 @@ extern "C" {
 			return;
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
-				std::cout << "FILE CALLBACK\n";
-				std::cout << "Making thread " << currThread << " READY" << std::endl;
-				std::cout << "Making thread " << args->id << " RUNNING. ITS PREV STATE WAS" << threadHolder[args->id].state << std::endl;
+				// std::cout << "FILE CALLBACK\n";
+				// std::cout << "Making thread " << currThread << " READY" << std::endl;
+				// std::cout << "Making thread " << args->id << " RUNNING. ITS PREV STATE WAS" << threadHolder[args->id].state << std::endl;
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[args->id].prio-1].push(args->id);
 				schedule(0);
