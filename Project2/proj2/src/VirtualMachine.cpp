@@ -66,7 +66,7 @@ extern "C" {
 		currThread = next;
 
 
-		std::cout << "Going from " << prev << " to " << next << std::endl;
+		// std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
@@ -78,12 +78,12 @@ extern "C" {
 	}
 
 	void schedule(int scheduleEqualPrio) {
-		if (threadHolder.size() > 2) {
-			std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
-		}
-		if (threadHolder.size() > 3) {
-			std::cout << "4rd THREAD STATE: " << threadHolder[3].state << std::endl;
-		}
+		// if (threadHolder.size() > 2) {
+		// 	std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
+		// }
+		// if (threadHolder.size() > 3) {
+		// 	std::cout << "4rd THREAD STATE: " << threadHolder[3].state << std::endl;
+		// }
 		TVMThreadID nextThread;
 
 
@@ -120,8 +120,8 @@ extern "C" {
 			readyThreads[1].pop();
 		} else {
 			nextThread = readyThreads[0].front();
-			std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
-			std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
+			// std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
+			// std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
 			readyThreads[0].pop();
 		}
 		dispatch(nextThread);
