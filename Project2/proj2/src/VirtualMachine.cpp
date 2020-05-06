@@ -42,16 +42,16 @@ extern "C" {
 	};
 	// TCB
 	class Thread {
-	public:
-		TVMThreadID id;
-		TVMThreadState state;
-		TVMThreadPriority prio;
-		TVMThreadEntry entry;
-		void* args;
-		SMachineContext cntx;
-		TVMMemorySize memsize;
-		void* stackaddr;
-		int sleepCountdown;
+		public:
+			TVMThreadID id;
+			TVMThreadState state;
+			TVMThreadPriority prio;
+			TVMThreadEntry entry;
+			void* args;
+			SMachineContext cntx;
+			TVMMemorySize memsize;
+			void* stackaddr;
+			int sleepCountdown;
 	};
 
 	volatile TVMThreadID currThread = 1;
@@ -102,6 +102,8 @@ extern "C" {
 			nextThread = 0;
 		} else if (!readyThreads[2].empty()) {
 			nextThread = readyThreads[2].front();
+			std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
+			std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
 			readyThreads[2].pop();
 		} else if (!readyThreads[1].empty()) {
 			nextThread = readyThreads[1].front();
