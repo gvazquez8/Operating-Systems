@@ -38,7 +38,7 @@ extern "C" {
 	// Struct for FileOpen
 	struct callBackDataStorage {
 		TVMThreadID id;
-		int** resultPtr;
+		int* resultPtr;
 	};
 	// TCB
 	class Thread {
@@ -420,7 +420,7 @@ extern "C" {
 			std::cout << "POINTER IS NULL!" << std::endl;
 		}
 
-		**(args->resultPtr) = result;
+		*(args->resultPtr) = result;
 
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
 			return;
@@ -455,11 +455,11 @@ extern "C" {
 		}
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-		callBackDataStorage cb;
-		cb.id = currThread;
-		cb.resultPtr = &fd;
+		callBackDataStorage *cb = new callBackDataStorage();
+		cb->id = currThread;
+		cb->resultPtr = fd;
 
-		MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
+		MachineFileOpen(filename, flags, mode, &fileCallBack, cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
 		if (*fd < 0) {
@@ -482,10 +482,10 @@ extern "C" {
 		MachineSuspendSignals(&signalState);
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		int result;
-		callBackDataStorage cb;
-		cb.id = currThread;
-		cb.resultPtr = &(int*)&result;
-		MachineFileClose(fd, &fileCallBack, &cb);
+		callBackDataStorage *cb = new callBackDataStorage();
+		cb->id = currThread;
+		cb->resultPtr = (int*)&result;
+		MachineFileClose(fd, &fileCallBack, cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
 
@@ -517,11 +517,11 @@ extern "C" {
 
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-		callBackDataStorage cb;
-		cb.id = currThread;
-		cb.resultPtr = &length;
+		callBackDataStorage *cb = new callBackDataStorage();;
+		cb->id = currThread;
+		cb->resultPtr = length;
 
-		MachineFileRead(fd, data, *length, &fileCallBack, &cb);
+		MachineFileRead(fd, data, *length, &fileCallBack, cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
 		if (*length < 0) {
@@ -534,7 +534,7 @@ extern "C" {
 
 	TVMStatus VMFileWrite(int fd, void* data, int* length) {
 		/* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
-			Params:b
+			Params:
 				fd = file descriptor
 				data = location where file data is stored
 				length = number of bytes
@@ -545,17 +545,17 @@ extern "C" {
 		*/
 		MachineSuspendSignals(&signalState);
 		if (data == NULL || length == NULL) {
-			std::cout << "LENGTH IS NULL!" << std::endl;
+			std::cout << "LENGTH IS NULL!" << std::endl
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-		callBackDataStorage cb;
-		cb.id = currThread;
-		cb.resultPtr = &length;
-		MachineFileWrite(fd, data, *length, &fileCallBack, &cb);
+		callBackDataStorage *cb = new callBackDataStorage();
+		cb->id = currThread;
+		cb->resultPtr = length;
+		MachineFileWrite(fd, data, *length, &fileCallBack, cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
 		if (*length < 0) {
@@ -583,11 +583,11 @@ extern "C" {
 
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
-		callBackDataStorage cb;
-		cb.id = currThread;
-		cb.resultPtr = &tempPointer;
+		callBackDataStorage *cb = new callBackDataStorage();
+		cb->id = currThread;
+		cb->resultPtr = tempPointer;
 
-		MachineFileSeek(fd, offset, whence, &fileCallBack, &cb);
+		MachineFileSeek(fd, offset, whence, &fileCallBack, cb);
 		schedule(0);
 
 		if (newoffset != NULL) {
