@@ -432,6 +432,7 @@ extern "C" {
 		*(args->resultPtr) = result;
 
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
+			std::cout << "IN FILE CALLBACK WITH DEAD THREAD " << args->id << std::endl;
 			return;
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
