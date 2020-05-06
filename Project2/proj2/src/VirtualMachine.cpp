@@ -420,7 +420,7 @@ extern "C" {
 			std::cout << "POINTER IS NULL!" << std::endl;
 		}
 
-		*(args->resultPtr) = result;
+		**(args->resultPtr) = result;
 
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
 			return;
@@ -457,7 +457,7 @@ extern "C" {
 
 		callBackDataStorage cb;
 		cb.id = currThread;
-		cb.resultPtr = fd;
+		cb.resultPtr = &fd;
 
 		MachineFileOpen(filename, flags, mode, &fileCallBack, &cb);
 		schedule(0);
@@ -484,7 +484,7 @@ extern "C" {
 		int result;
 		callBackDataStorage cb;
 		cb.id = currThread;
-		cb.resultPtr = (int*)&result;
+		cb.resultPtr = &(int*)&result;
 		MachineFileClose(fd, &fileCallBack, &cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
@@ -519,7 +519,7 @@ extern "C" {
 
 		callBackDataStorage cb;
 		cb.id = currThread;
-		cb.resultPtr = length;
+		cb.resultPtr = &length;
 
 		MachineFileRead(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
@@ -534,7 +534,7 @@ extern "C" {
 
 	TVMStatus VMFileWrite(int fd, void* data, int* length) {
 		/* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
-			Params:
+			Params:b
 				fd = file descriptor
 				data = location where file data is stored
 				length = number of bytes
@@ -554,7 +554,7 @@ extern "C" {
 
 		callBackDataStorage cb;
 		cb.id = currThread;
-		cb.resultPtr = length;
+		cb.resultPtr = &length;
 		MachineFileWrite(fd, data, *length, &fileCallBack, &cb);
 		schedule(0);
 		MachineResumeSignals(&signalState);
@@ -585,7 +585,7 @@ extern "C" {
 
 		callBackDataStorage cb;
 		cb.id = currThread;
-		cb.resultPtr = tempPointer;
+		cb.resultPtr = &tempPointer;
 
 		MachineFileSeek(fd, offset, whence, &fileCallBack, &cb);
 		schedule(0);
