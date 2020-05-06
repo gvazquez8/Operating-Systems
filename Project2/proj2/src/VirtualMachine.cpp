@@ -97,16 +97,6 @@ extern "C" {
 		}
 		TVMThreadID nextThread;
 
-		for (unsigned int i = 0; i < 3; i++) {
-			for (unsigned int j = 0; j < readyThreads[i].size(); i++) {
-				TVMThreadID id = readyThreads[i].front();
-				readyThreads[i].pop();
-				if (threadHolder[id].state == VM_THREAD_STATE_READY) {
-					readyThreads[i].push(id);
-				}
-			}
-		}
-
 		if (scheduleEqualPrio == 1) {
 			if (readyThreads[threadHolder[currThread].prio-1].size() != 0) {
 				nextThread = readyThreads[threadHolder[currThread].prio-1].front();
