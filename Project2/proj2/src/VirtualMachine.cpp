@@ -131,6 +131,7 @@ extern "C" {
 
 		VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
 		threadHolder[idleID].state = VM_THREAD_STATE_READY;
+		readyThreads[threadHolder[idleID].prio].push(idleID);
 		MachineContextCreate(&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
 
 		// Create the main thread
@@ -285,6 +286,7 @@ extern "C" {
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 		readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
+
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
