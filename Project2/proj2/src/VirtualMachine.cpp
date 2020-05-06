@@ -422,14 +422,14 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
-			std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> READY" << std::endl;
+			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			// std::cout << "IN SLEEP\n";
 			// std::cout << "Making thread " << currThread << " READY" << std::endl;
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
-			std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
+			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 			threadHolder[currThread].sleepCountdown = tick;
 			// std::cout << "IN SLEEP\n";
