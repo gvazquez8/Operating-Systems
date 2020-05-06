@@ -179,6 +179,7 @@ extern "C" {
 		totalTickCount++;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
+				std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
 				sleepingThreads.erase(sleepingThreads.begin()+i);
@@ -188,6 +189,7 @@ extern "C" {
 			}
 		}
 		if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
+			std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
 		}
@@ -335,6 +337,7 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_STATE;
 		}
 
+		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> DEAD" << std::endl;
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		if (thread == currThread) {
 			std::cout << "Terminating thread " << threadHolder[thread].id << std::endl;
@@ -419,12 +422,14 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
+			std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			// std::cout << "IN SLEEP\n";
 			// std::cout << "Making thread " << currThread << " READY" << std::endl;
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
+			std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 			threadHolder[currThread].sleepCountdown = tick;
 			// std::cout << "IN SLEEP\n";
@@ -445,7 +450,9 @@ extern "C" {
 			return;
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
+				std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
+				std::cout << "THREAD " << threadHolder[args->id].id << ": " << threadHolder[args->id].state << " -> READY" << std::endl;
 				threadHolder[args->id].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[args->id].prio-1].push(args->id);
 				schedule(0);
@@ -468,8 +475,9 @@ extern "C" {
 		MachineSuspendSignals(&signalState);
 		if (fd == NULL || filename == NULL) {
 			MachineResumeSignals(&signalState);
-			return VM_STATUS_ERROR_INVALID_PARAMETER;}
-
+			return VM_STATUS_ERROR_INVALID_PARAMETER;
+		}
+		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -497,6 +505,7 @@ extern "C" {
 		*/
 
 		MachineSuspendSignals(&signalState);
+		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		int result;
 		callBackDataStorage cb;
@@ -532,6 +541,7 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 
+		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -565,7 +575,7 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
-
+		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -597,6 +607,7 @@ extern "C" {
 		int placeHolder = 0;
 		int* tempPointer = &placeHolder;
 
+		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
