@@ -67,10 +67,6 @@ extern "C" {
 
 
 		std::cout << "Going from " << prev << " to " << next << std::endl;
-		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
-			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
-		}
-
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 
 		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
