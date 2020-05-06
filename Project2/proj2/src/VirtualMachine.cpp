@@ -62,7 +62,6 @@ extern "C" {
 	std::vector<unsigned int> sleepingThreads;
 
 	void dispatch(TVMThreadID next) {
-		std::cout << "current Thread " << currThread << std::endl;
 		TVMThreadID prev = currThread;
 		currThread = next;
 
