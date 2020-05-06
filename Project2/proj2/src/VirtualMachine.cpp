@@ -425,6 +425,7 @@ extern "C" {
 	}
 
 	void fileCallBack(void *calldata, int result) {
+		MachineSuspendSignals(&signalState);
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 		*(args->resultPtr) = result;
 
@@ -439,6 +440,7 @@ extern "C" {
 				schedule(0);
 			}
 		}
+		MachineResumeSignals(&signalState);
 	}
 	TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
 		/* Open and possibly creates file in file system.
