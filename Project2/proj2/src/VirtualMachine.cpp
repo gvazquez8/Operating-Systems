@@ -435,6 +435,7 @@ extern "C" {
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
 				threadHolder[args->id].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[args->id].prio-1].push(args->id);
+				readyThreads[threadHolder[currThread].prio-1].push(currThread);
 				schedule(0);
 			}
 		}
