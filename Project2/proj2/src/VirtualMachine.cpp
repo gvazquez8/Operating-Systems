@@ -168,12 +168,6 @@ extern "C" {
 
 	void timerCallback(void* calldata) {
 		MachineSuspendSignals(&signalState);
-		if (threadHolder.size() > 2) {
-			std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
-		}
-		if (threadHolder.size() > 3) {
-			std::cout << "4rd THREAD STATE: " << threadHolder[3].state << std::endl;
-		}
 		totalTickCount++;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
