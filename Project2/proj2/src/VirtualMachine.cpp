@@ -410,7 +410,7 @@ extern "C" {
 		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
-			readyThreads[threadHolder[currThread].prio-1].push(currThread);
+			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
