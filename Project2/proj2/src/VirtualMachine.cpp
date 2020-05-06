@@ -450,9 +450,9 @@ extern "C" {
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
 			return;
 		} else {
-			// std::cout << "IN FILE CALLBACK" << std::endl;
+			std::cout << "IN FILE CALLBACK" << std::endl;
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
-				// std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
+				std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
 				// std::cout << "THREAD " << threadHolder[args->id].id << ": " << threadHolder[args->id].state << " -> READY" << std::endl;
 				threadHolder[args->id].state = VM_THREAD_STATE_READY;
