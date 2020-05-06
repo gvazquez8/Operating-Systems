@@ -544,7 +544,8 @@ extern "C" {
 				VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
 		*/
 		MachineSuspendSignals(&signalState);
-		if (data == NULL || length == NULL || fd == NULL) {
+		if (data == NULL || length == NULL) {
+			std::cout << "LENGTH IS NULL!" << std::endl;
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
