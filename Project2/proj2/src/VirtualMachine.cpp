@@ -421,12 +421,9 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
-		// std::cout << "IN THREAD SLEEP" << std::endl;
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
-			// std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
+			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
-			// std::cout << "IN SLEEP\n";
-			// std::cout << "Making thread " << currThread << " READY" << std::endl;
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
