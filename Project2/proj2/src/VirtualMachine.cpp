@@ -163,6 +163,8 @@ extern "C" {
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
+				std::cout << "Waking thread " << threadHolder[sleepingThreads[i]].id << std::endl;
+				std::cout << "Its state:  " << threadHolder[sleepingThreads[i]].state << std::endl;
 				readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
