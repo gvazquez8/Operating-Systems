@@ -66,23 +66,24 @@ extern "C" {
 		currThread = next;
 
 
-		// std::cout << "Going from " << prev << " to " << next << std::endl;
+		std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
 
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
+
 		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 
 	}
 
 	void schedule(int scheduleEqualPrio) {
-		// if (threadHolder.size() > 2) {
-		// 	std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
-		// }
-		// if (threadHolder.size() > 3) {
-		// 	std::cout << "4rd THREAD STATE: " << threadHolder[3].state << std::endl;
-		// }
+		if (threadHolder.size() > 2) {
+			std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
+		}
+		if (threadHolder.size() > 3) {
+			std::cout << "4rd THREAD STATE: " << threadHolder[3].state << std::endl;
+		}
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
