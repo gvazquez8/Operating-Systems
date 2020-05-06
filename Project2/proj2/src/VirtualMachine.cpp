@@ -93,7 +93,7 @@ extern "C" {
 		}
 
 		if (readyThreads[0].empty() && readyThreads[1].empty() && readyThreads[2].empty()) {
-			nextThread = 0;
+			nextThread = currThread;
 		} else if (!readyThreads[2].empty()) {
 			nextThread = readyThreads[2].front();
 			readyThreads[2].pop();
