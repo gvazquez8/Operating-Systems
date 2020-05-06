@@ -118,15 +118,17 @@ extern "C" {
 			}
 		}
 
-		if (readyThreads[2].size() == 0 && readyThreads[1].size() == 0) {
-			nextThread = readyThreads[0].front();
-			readyThreads[0].pop();
-		} else if (readyThreads[2].size() == 0 && readyThreads[1].size() != 0) {
+		if (readyThreads[0].empty() && readyThreads[1].empty() && readyThreads[2].empty()) {
+			nextThread = threadHolder[currThread].id;
+		} else if (!readyThreads[2].empty()) {
+			nextThread = readyThreads[2].front();
+			readyThreads[2].pop();
+		} else if (!readyThreads[1].empty()) {
 			nextThread = readyThreads[1].front();
 			readyThreads[1].pop();
 		} else {
-			nextThread = readyThreads[2].front();
-			readyThreads[2].pop();
+			nextThread = readyThreads[0].front();
+			readyThreads[0].pop();
 		}
 		dispatch(nextThread);
 	}
