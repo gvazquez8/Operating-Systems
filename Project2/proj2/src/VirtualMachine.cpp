@@ -316,7 +316,6 @@ extern "C" {
 
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		if (thread == currThread) {
-			std::cout << "Terminating thread " << threadHolder[thread].id << std::endl;
 			for (unsigned int i = 0; i < readyThreads[threadHolder[thread].prio-1].size(); i++) {
 				unsigned int tid = readyThreads[threadHolder[thread].prio-1].front();
 				readyThreads[threadHolder[thread].prio-1].pop();
@@ -415,10 +414,6 @@ extern "C" {
 	void fileCallBack(void *calldata, int result) {
 		MachineSuspendSignals(&signalState);
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
-
-		if (args->resultPtr == NULL) {
-			std::cout << "POINTER IS NULL!" << std::endl;
-		}
 
 		*(args->resultPtr) = result;
 
@@ -545,7 +540,6 @@ extern "C" {
 		*/
 		MachineSuspendSignals(&signalState);
 		if (data == NULL || length == NULL) {
-			std::cout << "LENGTH IS NULL!" << std::endl;
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
