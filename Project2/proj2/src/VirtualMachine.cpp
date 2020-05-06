@@ -410,7 +410,8 @@ extern "C" {
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 
 		*(args->resultPtr) = result;
-
+		std::cout << "IN THREAD: " << (TVMThread) currThread << "\n";
+		std::cout << "CALLDATA THREAD: " << (TVMThread) args->id << "\n";
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
 			return;
 		} else {
