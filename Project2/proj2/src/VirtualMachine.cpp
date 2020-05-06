@@ -283,7 +283,7 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_ID;
 		}
-
+		std::cout << "ACTIVATING THREAD: " << thread << std::endl;
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 		readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
