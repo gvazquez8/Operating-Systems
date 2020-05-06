@@ -179,6 +179,7 @@ extern "C" {
 		totalTickCount++;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
+				std::cout << "IN TIMER CALLBACK" << std::endl;
 				std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
@@ -420,6 +421,7 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
+		std::cout << "IN THREAD SLEEP" << std::endl;
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
 			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
@@ -448,6 +450,7 @@ extern "C" {
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
 			return;
 		} else {
+			std::cout << "IN FILE CALLBACK" << std::endl;
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
 				std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
@@ -571,6 +574,7 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
+		std::cout << "IN FILE WRITE" << std::endl;
 		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
