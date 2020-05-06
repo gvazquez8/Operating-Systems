@@ -433,8 +433,8 @@ extern "C" {
 			// std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 			threadHolder[currThread].sleepCountdown = tick;
-			// std::cout << "IN SLEEP\n";
-			// std::cout << "Making thread " << currThread << " WAITING" << std::endl;
+			std::cout << "IN SLEEP\n";
+			std::cout << "Making thread " << currThread << " -> WAITING" << std::endl;
 			sleepingThreads.push_back(threadHolder[currThread].id);
 			schedule(0);
 		}
@@ -571,8 +571,7 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
-		std::cout << "IN FILE WRITE" << std::endl;
-		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
+
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
