@@ -110,6 +110,7 @@ extern "C" {
 	}
 
 	void skeleton(void* param) {
+		MachineEnableSignals();
 		threadHolder[currThread].entry(threadHolder[currThread].args);
 		MachineSuspendSignals(&signalState);
 		VMThreadTerminate(currThread);
