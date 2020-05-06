@@ -64,6 +64,20 @@ extern "C" {
 	void dispatch(TVMThreadID next) {
 		TVMThreadID prev = currThread;
 		currThread = next;
+
+		std::cout << "Going from " << prev << " to " << next << std::endl;
+		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
+			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
+		}
+		if (threadHolder.size() > 2) {
+			std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
+		}
+		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
+		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
+
+	}
+
+	void schedule(int scheduleEqualPrio) {
 		for (unsigned int i = 0; i < 3; i++) {
 			if (i == 0) {
 				std::cout << "LOW THREADS: ";
@@ -80,19 +94,6 @@ extern "C" {
 			}
 			std::cout << std::endl;
 		}
-		std::cout << "Going from " << prev << " to " << next << std::endl;
-		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
-			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
-		}
-		if (threadHolder.size() > 2) {
-			std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
-		}
-		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
-		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
-
-	}
-
-	void schedule(int scheduleEqualPrio) {
 		TVMThreadID nextThread;
 
 		for (unsigned int i = 0; i < 3; i++) {
