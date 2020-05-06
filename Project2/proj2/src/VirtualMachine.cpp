@@ -154,7 +154,6 @@ extern "C" {
 	}
 
 	void timerCallback(void* calldata) {
-		MachineSuspendSignals(&signalState);
 		totalTickCount++;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
@@ -166,12 +165,13 @@ extern "C" {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
 		}
+
 		if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
 		}
+
 		schedule(0);
-		MachineResumeSignals(&signalState);
 	}
 
 	TVMStatus VMTickMS(int *tickmsref) {
