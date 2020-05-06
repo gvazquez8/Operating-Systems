@@ -87,7 +87,12 @@ extern "C" {
 	}
 
 	void schedule(int scheduleEqualPrio) {
-
+		if (threadHolder.size() > 2) {
+			std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
+		}
+		if (threadHolder.size() > 3) {
+			std::cout << "4rd THREAD STATE: " << threadHolder[3].state << std::endl;
+		}
 		TVMThreadID nextThread;
 
 		if (scheduleEqualPrio == 1) {
