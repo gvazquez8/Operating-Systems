@@ -38,7 +38,7 @@ extern "C" {
 	// Struct for FileOpen
 	struct callBackDataStorage {
 		TVMThreadID id;
-		int* resultPtr;
+		int** resultPtr;
 	};
 	// TCB
 	class Thread {
