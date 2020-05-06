@@ -1,4 +1,4 @@
-#include "VirtualMachine.h" 	 	    		
+#include "VirtualMachine.h"
 
 #ifndef NULL
 #define NULL    ((void *)0)
@@ -33,6 +33,6 @@ void VMMain(int argc, char *argv[]){
     VMPrint("VMMain going to sleep 50\n");
     VMThreadSleep(50);
     VMPrint("VMMain Awake\nGoodbye\n");
-    
+
 }
 

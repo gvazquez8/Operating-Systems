@@ -81,6 +81,7 @@ extern "C" {
 		// 	std::cout << std::endl;
 		// }
 		std::cout << "Going from " << prev << " to " << next << std::endl;
+		if (threadHolder)
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
@@ -179,17 +180,12 @@ extern "C" {
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
-				if (threadHolder[sleepingThreads[i]].prio > threadHolder[currThread].prio) {
-					dispatch(sleepingThreads[i]);
-					break;
-
-				} else {
-					readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
-				}
+				readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
 			} else {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
 		}
+		schedule(0);
 	}
 
 	TVMStatus VMTickMS(int *tickmsref) {
@@ -309,8 +305,6 @@ extern "C" {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			dispatch(thread);
 		} else {
-			std::cout << "Activating thread: " << thread << "\n";
-			std::cout << "threadHolder[thread].id" << threadHolder[thread].id << "\n";
 			readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
 		}
 
