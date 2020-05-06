@@ -62,6 +62,9 @@ extern "C" {
         std::vector<unsigned int> sleepingThreads;
 
         void dispatch(TVMThreadID next) {
+
+        		if (threadHolder[currThread].state == )
+
                 TVMThreadID prev = currThread;
                 currThread = next;
 
@@ -287,8 +290,8 @@ extern "C" {
                         return VM_STATUS_ERROR_INVALID_ID;
                 }
 
-                threadHolder[thread].state = VM_THREAD_STATE_READY;
                 MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
+                threadHolder[thread].state = VM_THREAD_STATE_READY;
                 readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
                 if (threadHolder[thread].prio > threadHolder[currThread].prio) {
                         schedule(0);
@@ -320,15 +323,6 @@ extern "C" {
                 threadHolder[thread].state = VM_THREAD_STATE_DEAD;
                 if (thread == currThread) {
                         std::cout << "Terminating thread " << threadHolder[thread].id << std::endl;
-                        for (unsigned int i = 0; i < readyThreads[threadHolder[thread].prio-1].size(); i++) {
-                                unsigned int tid = readyThreads[threadHolder[thread].prio-1].front();
-                                readyThreads[threadHolder[thread].prio-1].pop();
-                                if (tid == thread) {
-                                        continue;
-                                } else {
-                                        readyThreads[threadHolder[thread].prio-1].push(tid);
-                                }
-                        }
                         schedule(0);
                 }
 
