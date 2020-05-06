@@ -63,8 +63,6 @@ extern "C" {
 
         void dispatch(TVMThreadID next) {
 
-        		if (threadHolder[currThread].state == )
-
                 TVMThreadID prev = currThread;
                 currThread = next;
 
