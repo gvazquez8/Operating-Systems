@@ -402,11 +402,15 @@ extern "C" {
 		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
+			std::cout << "IN SLEEP\n";
+			std::cout << "Making thread " << currThread << " READY" << std::endl;
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 			threadHolder[currThread].sleepCountdown = tick;
+			std::cout << "IN SLEEP\n";
+			std::cout << "Making thread " << currThread << " WAITING" << std::endl;
 			sleepingThreads.push_back(threadHolder[currThread].id);
 			schedule(0);
 		}
@@ -423,6 +427,7 @@ extern "C" {
 			return;
 		} else {
 			if (threadHolder[args->id].state > threadHolder[currThread].state) {
+				std::cout << "FILE CALLBACK\n";
 				std::cout << "Making thread " << currThread << " READY" << std::endl;
 				std::cout << "Making thread " << args->id << " RUNNING. ITS PREV STATE WAS" << threadHolder[args->id].state << std::endl;
 				threadHolder[currThread].state = VM_THREAD_STATE_READY;
