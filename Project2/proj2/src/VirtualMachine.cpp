@@ -177,10 +177,10 @@ extern "C" {
 	void timerCallback(void* calldata) {
 		MachineSuspendSignals(&signalState);
 		totalTickCount++;
+		std::cout << "IN TIMER CALLBACK" << std::endl;
 		for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
 			if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
-				// std::cout << "IN TIMER CALLBACK" << std::endl;
-				// std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
+				std::cout << "THREAD " << sleepingThreads[i] << ": " << threadHolder[sleepingThreads[i]].state << " -> READY" << std::endl;
 				threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
 				readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
 				sleepingThreads.erase(sleepingThreads.begin()+i);
@@ -190,7 +190,7 @@ extern "C" {
 			}
 		}
 		if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
-			// std::cout << "THREAD " << currThread << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
+			std::cout << "THREAD " << currThread << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
 		}
@@ -422,12 +422,10 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 		if (tick == VM_TIMEOUT_IMMEDIATE) {
-			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
 			schedule(1);
 		} else {
-			std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 			threadHolder[currThread].sleepCountdown = tick;
 			sleepingThreads.push_back(threadHolder[currThread].id);
