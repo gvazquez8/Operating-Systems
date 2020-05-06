@@ -416,8 +416,9 @@ extern "C" {
 		MachineSuspendSignals(&signalState);
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
 
-		std::cout << "args: resultPtr: " << args->resultPtr << std::endl;
-		std::cout << "args: resultPtr: " << *(args->resultPtr) << std::endl;
+		if (args->resultPtr == NULL) {
+			std::cout << "POINTER IS NULL!" << std::endl;
+		}
 		*(args->resultPtr) = result;
 
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
