@@ -157,7 +157,7 @@ extern "C" {
         }
 
         void timerCallback(void* calldata) {
-                MachineSuspendSignals(&signalState);
+                // MachineSuspendSignals(&signalState);
                 totalTickCount++;
                 for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
                         if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
@@ -174,7 +174,7 @@ extern "C" {
                         readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
                 }
                 schedule(0);
-                MachineResumeSignals(&signalState);
+                // MachineResumeSignals(&signalState);
         }
 
         TVMStatus VMTickMS(int *tickmsref) {
