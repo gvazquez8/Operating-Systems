@@ -70,9 +70,9 @@ extern "C" {
 			std::cout << "Thread " << prev << " pushed into ready queue " << (threadHolder[prev].prio-1) << std::endl;
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
-		if (threadHolder.size() > 2) {
-			std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
-		}
+		// if (threadHolder.size() > 2) {
+		// 	std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
+		// }
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
 		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 
