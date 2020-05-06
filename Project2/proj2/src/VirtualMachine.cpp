@@ -316,15 +316,6 @@ extern "C" {
 
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		if (thread == currThread) {
-			for (unsigned int i = 0; i < readyThreads[threadHolder[thread].prio-1].size(); i++) {
-				unsigned int tid = readyThreads[threadHolder[thread].prio-1].front();
-				readyThreads[threadHolder[thread].prio-1].pop();
-				if (tid == thread) {
-					continue;
-				} else {
-					readyThreads[threadHolder[thread].prio-1].push(tid);
-				}
-			}
 			schedule(0);
 		}
 
