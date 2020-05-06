@@ -337,7 +337,6 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_STATE;
 		}
 
-		std::cout << "THREAD " << threadHolder[thread].id << ": " << threadHolder[thread].state << " -> DEAD" << std::endl;
 		threadHolder[thread].state = VM_THREAD_STATE_DEAD;
 		if (thread == currThread) {
 			std::cout << "Terminating thread " << threadHolder[thread].id << std::endl;
@@ -477,7 +476,6 @@ extern "C" {
 			MachineResumeSignals(&signalState);
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
-		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -505,7 +503,6 @@ extern "C" {
 		*/
 
 		MachineSuspendSignals(&signalState);
-		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 		int result;
 		callBackDataStorage cb;
@@ -541,7 +538,6 @@ extern "C" {
 			return VM_STATUS_ERROR_INVALID_PARAMETER;
 		}
 
-		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
@@ -607,7 +603,6 @@ extern "C" {
 		int placeHolder = 0;
 		int* tempPointer = &placeHolder;
 
-		std::cout << "THREAD " << threadHolder[currThread].id << ": " << threadHolder[currThread].state << " -> WAITING" << std::endl;
 		threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
 
 		callBackDataStorage cb;
