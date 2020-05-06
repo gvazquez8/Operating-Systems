@@ -80,7 +80,7 @@ extern "C" {
 		// 	}
 		// 	std::cout << std::endl;
 		// }
-		std::cout << "Going from " << prev << " to " << next << std::endl;
+		// std::cout << "Going from " << prev << " to " << next << std::endl;
 		if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
 			readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
 		}
@@ -300,7 +300,6 @@ extern "C" {
 		threadHolder[thread].state = VM_THREAD_STATE_READY;
 		MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
 		if (threadHolder[thread].prio > threadHolder[currThread].prio) {
-			std::cout << "Dispatching thread: " << thread << " from " << currThread << " activate" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			dispatch(thread);
 		} else {
