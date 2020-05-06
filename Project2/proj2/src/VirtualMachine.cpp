@@ -167,6 +167,7 @@ extern "C" {
 				threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
 			}
 		}
+		threadHolder[currThread].state = VM_THREAD_STATE_READY;
 		schedule(0);
 	}
 
