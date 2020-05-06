@@ -95,7 +95,7 @@ extern "C" {
 		}
 
 		if (readyThreads[0].empty() && readyThreads[1].empty() && readyThreads[2].empty()) {
-			nextThread = threadHolder[currThread].id;
+			nextThread = 0;
 		} else if (!readyThreads[2].empty()) {
 			nextThread = readyThreads[2].front();
 			readyThreads[2].pop();
