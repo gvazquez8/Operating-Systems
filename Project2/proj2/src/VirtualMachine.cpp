@@ -125,7 +125,7 @@ extern "C" {
                 readyThreads.resize(3);
                 TVMMainEntry VMMain = VMLoadModule(argv[0]);
                 if (VMMain == NULL) {return VM_STATUS_FAILURE;}
-                tickTimeMSArg = tickms;
+                tickTimeMSArg = tickms+1;
                 MachineInitialize();
                 MachineEnableSignals();
                 // create the idle and main thread;
