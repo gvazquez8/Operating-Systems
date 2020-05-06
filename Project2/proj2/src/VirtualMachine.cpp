@@ -190,7 +190,7 @@ extern "C" {
 			}
 		}
 		if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
-			std::cout << "THREAD " << currThread << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
+			// std::cout << "THREAD " << currThread << ": " << threadHolder[currThread].state << " -> READY" << std::endl;
 			threadHolder[currThread].state = VM_THREAD_STATE_READY;
 			readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
 		}
