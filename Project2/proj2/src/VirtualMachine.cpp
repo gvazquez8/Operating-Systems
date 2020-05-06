@@ -74,14 +74,14 @@ extern "C" {
 		// 	std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
 		// }
 		threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
-		std::cout << "IDLE THREAD STATE: " << threadHolder[0].state << std::endl;
-		std::cout << "MAIN THREAD STATE: " << threadHolder[1].state << std::endl;
-		if (threadHolder.size() > 2) {
-			std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
-		}
-		if (threadHolder.size() > 3) {
-			std::cout << "4th THREAD STATE: " << threadHolder[3].state << std::endl;
-		}
+		// std::cout << "IDLE THREAD STATE: " << threadHolder[0].state << std::endl;
+		// std::cout << "MAIN THREAD STATE: " << threadHolder[1].state << std::endl;
+		// if (threadHolder.size() > 2) {
+		// 	std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
+		// }
+		// if (threadHolder.size() > 3) {
+		// 	std::cout << "4th THREAD STATE: " << threadHolder[3].state << std::endl;
+		// }
 		MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
 
 	}
