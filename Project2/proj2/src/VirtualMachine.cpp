@@ -83,8 +83,12 @@ extern "C" {
 
 		std::cout << "IDLE THREAD STATE: " << threadHolder[0].state << std::endl;
 		std::cout << "MAIN THREAD STATE: " << threadHolder[1].state << std::endl;
-		std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
-		std::cout << "4th THREAD STATE: " << threadHolder[3].state << std::endl;
+		if (threadHolder.size() > 2) {
+			std::cout << "3rd THREAD STATE: " << threadHolder[2].state << std::endl;
+		}
+		if (threadHolder.size() > 3) {
+			std::cout << "4th THREAD STATE: " << threadHolder[3].state << std::endl;
+		}
 
 
 		TVMThreadID nextThread;
