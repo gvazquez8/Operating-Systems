@@ -102,14 +102,14 @@ extern "C" {
 			nextThread = 0;
 		} else if (!readyThreads[2].empty()) {
 			nextThread = readyThreads[2].front();
-			std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
-			std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
 			readyThreads[2].pop();
 		} else if (!readyThreads[1].empty()) {
 			nextThread = readyThreads[1].front();
 			readyThreads[1].pop();
 		} else {
 			nextThread = readyThreads[0].front();
+			std::cout << "THREAD THAT WAS POPPED: " << nextThread << std::endl;
+			std::cout << "ITS STATE = " << threadHolder[nextThread].state << std::endl;
 			readyThreads[0].pop();
 		}
 		dispatch(nextThread);
