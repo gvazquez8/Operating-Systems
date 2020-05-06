@@ -415,6 +415,9 @@ extern "C" {
 	void fileCallBack(void *calldata, int result) {
 		MachineSuspendSignals(&signalState);
 		callBackDataStorage *args = (callBackDataStorage*) calldata;
+
+		std::cout << "args: resultPtr: " << args->resultPtr << std::endl;
+		std::cout << "args: resultPtr: " << *(args->resultPtr) << std::endl;
 		*(args->resultPtr) = result;
 
 		if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
