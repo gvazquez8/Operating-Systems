@@ -6,14 +6,15 @@
 
 extern "C" {
         // Stuff for functions in headers
-        #define VM_TIMEOUT_INFINITE                                             ((TVMTick)0)
-        #define VM_TIMEOUT_IMMEDIATE                                    ((TVMTick)-1)
+        #define VM_TIMEOUT_INFINITE						((TVMTick)0)
+        #define VM_TIMEOUT_IMMEDIATE                    ((TVMTick)-1)
 
         #define VM_THREAD_STATE_DEAD                    ((TVMThreadState)0x00)
         #define VM_THREAD_STATE_RUNNING                 ((TVMThreadState)0x01)
         #define VM_THREAD_STATE_READY                   ((TVMThreadState)0x02)
         #define VM_THREAD_STATE_WAITING                 ((TVMThreadState)0x03)
 
+		#define VM_THREAD_PRIORITY_NONE					((TVMThreadPriority)0x00)
         #define VM_THREAD_PRIORITY_LOW                  ((TVMThreadPriority)0x01)
         #define VM_THREAD_PRIORITY_NORMAL               ((TVMThreadPriority)0x02)
         #define VM_THREAD_PRIORITY_HIGH                 ((TVMThreadPriority)0x03)
@@ -26,566 +27,605 @@ extern "C" {
 
         TVMMainEntry VMLoadModule(const char* module);
         void VMUnloadModule(void);
-        void timerCallback(void*);
+        void tickCallBack(void*);
 
         // Store the tickms arg that was passed when starting the program
-        int tickTimeMSArg;
+        int tickTime;
         // tickCount stores the number of ticks since start
         volatile TVMTick totalTickCount = 0;
         // Signal State
         TMachineSignalState signalState;
 
-        // Struct for FileOpen
+        // Struct to hold callback information when using VMFile* functions
         struct callBackDataStorage {
-                TVMThreadID id;
-                int* resultPtr;
+            TVMThreadID id;
+            int* resultPtr;
         };
-        // TCB
+
+        // Class holding thread info (TCB)
         class Thread {
-        public:
-                TVMThreadID id;
-                TVMThreadState state;
-                TVMThreadPriority prio;
-                TVMThreadEntry entry;
-                void* args;
-                SMachineContext cntx;
-                TVMMemorySize memsize;
-                void* stackaddr;
-                int sleepCountdown;
+        	public:
+            	    TVMThreadID id;
+       	        	TVMThreadState state;
+            	    TVMThreadPriority prio;
+	                TVMThreadEntry entry;
+					void* args;
+                	SMachineContext cntx;
+                	TVMMemorySize memsize;
+                	void* stackaddr;
+                	int sleepCountdown;
         };
 
         volatile TVMThreadID currThread = 1;
 
-        std::vector<Thread> threadHolder;
-        // 0 = LOW, 1 = NORMAL, 2 = HIGH
+        std::vector<Thread> threadList;
         std::vector<std::queue<unsigned int>> readyThreads;
         std::vector<unsigned int> sleepingThreads;
 
         void dispatch(TVMThreadID next) {
 
-                TVMThreadID prev = currThread;
-                currThread = next;
+            TVMThreadID prev = currThread;
+            currThread = next;
 
-
-                // std::cout << "Going from " << prev << " to " << next << std::endl;
-                if (threadHolder[prev].state == VM_THREAD_STATE_READY) {
-                        readyThreads[threadHolder[prev].prio -1].push(threadHolder[prev].id);
-                }
-                // if (threadHolder.size() > 2) {
-                //      std::cout << "THREAD 2 STATE: " << threadHolder[2].state << std::endl;
-                // }
-                threadHolder[currThread].state = VM_THREAD_STATE_RUNNING;
-                MachineContextSwitch(&threadHolder[prev].cntx, &threadHolder[currThread].cntx);
+            // std::cout << "Going from " << prev << " to " << next << std::endl;
+            if (threadList[prev].state == VM_THREAD_STATE_READY) {
+                readyThreads[threadList[prev].prio].push(threadList[prev].id);
+            }
+            // if (threadList.size() > 2) {
+            //      std::cout << "THREAD 2 STATE: " << threadList[2].state << std::endl;
+            // }
+            threadList[currThread].state = VM_THREAD_STATE_RUNNING;
+            MachineContextSwitch(&threadList[prev].cntx, &threadList[currThread].cntx);
 
         }
 
         void schedule(int scheduleEqualPrio) {
 
-                TVMThreadID nextThread;
+            TVMThreadID nextThread;
 
-                if (scheduleEqualPrio == 1) {
-                        if (readyThreads[threadHolder[currThread].prio-1].size() != 0) {
-                                nextThread = readyThreads[threadHolder[currThread].prio-1].front();
-                                readyThreads[threadHolder[currThread].prio-1].pop();
-                                dispatch(nextThread);
-                                return;
-                        }
-                        else {
-                                return;
-                        }
+            if (scheduleEqualPrio == 1) {
+                if (readyThreads[threadList[currThread].prio].size() != 0) {
+                    nextThread = readyThreads[threadList[currThread].prio].front();
+                    readyThreads[threadList[currThread].prio].pop();
+                    dispatch(nextThread);
+                    return;
                 }
+                else {
+                    return;
+                }
+            }
 
-                if (readyThreads[0].empty() && readyThreads[1].empty() && readyThreads[2].empty()) {
-                        nextThread = 0;
-                } else if (!readyThreads[2].empty()) {
-                        nextThread = readyThreads[2].front();
-                        readyThreads[2].pop();
-                } else if (!readyThreads[1].empty()) {
-                        nextThread = readyThreads[1].front();
-                        readyThreads[1].pop();
-                } else {
-                        nextThread = readyThreads[0].front();
-                        readyThreads[0].pop();
-                }
-                dispatch(nextThread);
+            if (readyThreads[1].empty() && readyThreads[2].empty() && readyThreads[3].empty()) {
+                nextThread = readyThreads[0].front();
+                readyThreads[0].pop();
+            } else if (!readyThreads[3].empty()) {
+                nextThread = readyThreads[3].front();
+                readyThreads[3].pop();
+            } else if (!readyThreads[2].empty()) {
+                nextThread = readyThreads[2].front();
+                readyThreads[2].pop();
+            } else {
+                nextThread = readyThreads[1].front();
+                readyThreads[1].pop();
+            }
+            dispatch(nextThread);
         }
 
         void skeleton(void* param) {
-                MachineEnableSignals();
-                threadHolder[currThread].entry(threadHolder[currThread].args);
-                VMThreadTerminate(currThread);
+            MachineEnableSignals();
+            threadList[currThread].entry(threadList[currThread].args);
+            VMThreadTerminate(currThread);
         }
 
-        void idle(void* param) {
-                MachineResumeSignals(&signalState);
-                while(true) {
-                }
+        void idleFunction(void* param) {
+            MachineResumeSignals(&signalState);
+            while(true) {}
+        }
+
+        void VMCreateIdleThread() {
+        	// Creates the idle thread and push to thread list
+            Thread *idleThread = new Thread();
+            idleThread->state = VM_THREAD_STATE_READY;
+            idleThread->entry = &idleFunction;
+            idleThread->args = NULL;
+            idleThread->prio = VM_THREAD_PRIORITY_NONE;
+            idleThread->id = threadList.size();
+            idleThread->sleepCountdown = 0;
+            idleThread->memsize = 0x100000;
+            idleThread->stackaddr = malloc(idleThread->memsize * sizeof(TVMMemorySize));
+            threadList.push_back(*idleThread);
+            MachineContextCreate(&threadList[0].cntx, &skeleton, threadList[0].args,
+            	threadList[0].stackaddr, threadList[0].memsize);
+            return;
+        }
+
+        void VMCreateMainThread(TVMMainEntry VMMain, char* argv[]) {
+        	// Create the main thread and push to thread list
+            Thread *mainThread = new Thread();
+            mainThread->state = VM_THREAD_STATE_RUNNING;
+            mainThread->entry = (TVMThreadEntry) VMMain;
+            mainThread->args = argv;
+            mainThread->prio = VM_THREAD_PRIORITY_NORMAL;
+            mainThread->id = threadList.size();
+            mainThread->sleepCountdown = 0;
+            threadList.push_back(*mainThread);
         }
 
         TVMStatus VMStart(int tickms, int argc, char* argv[]) {
-                readyThreads.resize(3);
-                TVMMainEntry VMMain = VMLoadModule(argv[0]);
-                if (VMMain == NULL) {return VM_STATUS_FAILURE;}
-                tickTimeMSArg = tickms+1;
-                MachineInitialize();
-                MachineEnableSignals();
-                // create the idle and main thread;
-                TVMThreadID idleID;
+        	// Create the ready queues
+  			// Index 0: NONE priority queue (ONLY IDLE THREAD)
+        	// Index 1: LOW priority queue
+        	// Index 2: NORMAL priority queue
+        	// Index 3: HIGH priority queue
+            readyThreads.resize(4);
+            
+            // Load the Main Function
+            TVMMainEntry VMMain = VMLoadModule(argv[0]);
+            // If the function doesn't exist then return a failure
+            if (VMMain == NULL) {return VM_STATUS_FAILURE;}
+            
+            // Set the global variable tickTime
+            tickTime = tickms;
 
-                VMThreadCreate(idle, NULL, 0x100000, VM_THREAD_PRIORITY_LOW, &idleID);
-                threadHolder[idleID].state = VM_THREAD_STATE_READY;
-                MachineContextCreate(&threadHolder[idleID].cntx, &skeleton, threadHolder[idleID].args, threadHolder[idleID].stackaddr, threadHolder[idleID].memsize);
+            // Init the Machine
+            MachineInitialize();
+            // Enable Interrupts
+            MachineEnableSignals();
 
-                // Create the main thread
-                Thread *thread = new Thread();
-                thread->state = VM_THREAD_STATE_RUNNING;
-                thread->entry = (TVMThreadEntry) VMMain;
-                thread->args = argv;
-                thread->prio = VM_THREAD_PRIORITY_NORMAL;
-                thread->id = threadHolder.size();
-                thread->sleepCountdown = 0;
-                threadHolder.push_back(*thread);
+            VMCreateIdleThread();
+            VMCreateMainThread(VMMain, argv);
 
-                // create alarm for tick incrementing
-                useconds_t tickus = tickms * 1000;
-                MachineRequestAlarm(tickus, timerCallback, NULL);
-
-                VMMain(argc, argv);
-                MachineTerminate();
-                VMUnloadModule();
-                return VM_STATUS_SUCCESS;
+            // Set up timer
+            useconds_t tickus = tickTime * 1000;
+            MachineRequestAlarm(tickus, tickCallBack, NULL);
+            
+            VMMain(argc, argv);
+            
+            MachineTerminate();
+            VMUnloadModule();
+            
+            return VM_STATUS_SUCCESS;
         }
 
-        void timerCallback(void* calldata) {
-                MachineSuspendSignals(&signalState);
-                totalTickCount++;
-                for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
-                        if (threadHolder[sleepingThreads[i]].sleepCountdown == 0) {
-                                threadHolder[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
-                                readyThreads[threadHolder[sleepingThreads[i]].prio -1].push(threadHolder[sleepingThreads[i]].id);
-                                sleepingThreads.erase(sleepingThreads.begin()+i);
-                                i--;
-                        } else {
-                                threadHolder[sleepingThreads[i]].sleepCountdown -= 1;
-                        }
+        void tickCallBack(void* calldata) {
+            MachineSuspendSignals(&signalState);
+            totalTickCount++;
+            for (unsigned int i = 0; i < sleepingThreads.size(); i++) {
+                if (threadList[sleepingThreads[i]].sleepCountdown == 0) {
+                    threadList[sleepingThreads[i]].state = VM_THREAD_STATE_READY;
+                    readyThreads[threadList[sleepingThreads[i]].prio].push(threadList[sleepingThreads[i]].id);
+                    sleepingThreads.erase(sleepingThreads.begin()+i);
+                    i--;
+                } else {
+                    threadList[sleepingThreads[i]].sleepCountdown -= 1;
                 }
-                if (threadHolder[currThread].state != VM_THREAD_STATE_DEAD) {
-                        threadHolder[currThread].state = VM_THREAD_STATE_READY;
-                        readyThreads[threadHolder[currThread].prio -1].push(threadHolder[currThread].id);
-                }
-                schedule(0);
-                MachineResumeSignals(&signalState);
+            }
+            if (threadList[currThread].state != VM_THREAD_STATE_DEAD) {
+                threadList[currThread].state = VM_THREAD_STATE_READY;
+                readyThreads[threadList[currThread].prio].push(threadList[currThread].id);
+            }
+            schedule(0);
+            MachineResumeSignals(&signalState);
         }
 
         TVMStatus VMTickMS(int *tickmsref) {
-                /* Retrieves milliseconds between ticks of VM
-                        Params:
-                                tickmsref = location to put tick time interval in ms
-                        Returns:
-                                VM_STATUS_SUCCESS on successful retireval
-                                VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
-                */
+            /* Retrieves milliseconds between ticks of VM
+                    Params:
+                            tickmsref = location to put tick time interval in ms
+                    Returns:
+                            VM_STATUS_SUCCESS on successful retireval
+                            VM_STATUS_ERROR_INVALID_PARAMETER when tickmsref = NULL
+            */
 
-                MachineSuspendSignals(&signalState);
-                if (tickmsref == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-                *tickmsref = tickTimeMSArg;
+            MachineSuspendSignals(&signalState);
+            if (tickmsref == NULL) {
                 MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
+            *tickmsref = tickTime;
+            MachineResumeSignals(&signalState);
                 return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMTickCount(TVMTickRef tickref) {
-                /* Retrieves number of ticks that have occurred since start of VM
-                        Params:
-                                tickref = location to put ticks
-                        Returns:
-                                VM_STATUS_SUCCESS on success
-                                VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (tickref == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-                *tickref = totalTickCount;
+            /* Retrieves number of ticks that have occurred since start of VM
+                    Params:
+                            tickref = location to put ticks
+                    Returns:
+                            VM_STATUS_SUCCESS on success
+                            VM_STATUS_ERROR_INVALID_PARAMETER if tickref = NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (tickref == NULL) {
                 MachineResumeSignals(&signalState);
-                return VM_STATUS_SUCCESS;
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
+            *tickref = totalTickCount;
+            MachineResumeSignals(&signalState);
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsize, TVMThreadPriority prio, TVMThreadIDRef tid) {
-                /* Create a thread in VM
-                        Params:
-                                Thread is created in dead state
-                                entry = function of the thread
-                                param = parameter of function
-                                memsize = memory size
-                                prio = priority (1 = LOW, 2 = NORMAL, 3 = HIGH) (1 = IDLE)
-                                tid = thread identifier (ID)
-                        Returns:
-                        VM_STATUS_SUCCESS on successful creation
-                        VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (entry == NULL || tid == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-                Thread *thread = new Thread();
-                thread->state = VM_THREAD_STATE_DEAD;
-                thread->entry = entry;
-                thread->args = param;
-                thread->memsize = memsize;
-                thread->prio = prio;
-                thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
-                thread->id = threadHolder.size();
-                *tid = thread->id;
-                thread->sleepCountdown = 0;
-                threadHolder.push_back(*thread);
+            /* Create a thread in VM
+                    Params:
+                            Thread is created in dead state
+                            entry = function of the thread
+                            param = parameter of function
+                            memsize = memory size
+                            prio = priority (1 = LOW, 2 = NORMAL, 3 = HIGH) (1 = IDLE)
+                            tid = thread identifier (ID)
+                    Returns:
+                    VM_STATUS_SUCCESS on successful creation
+                    VM_STATUS_ERROR_INVALID_PARAMETER on entry == NULL or tid == NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (entry == NULL || tid == NULL) {
                 MachineResumeSignals(&signalState);
-                return VM_STATUS_SUCCESS;
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
+            Thread *thread = new Thread();
+            thread->state = VM_THREAD_STATE_DEAD;
+            thread->entry = entry;
+            thread->args = param;
+            thread->memsize = memsize;
+            thread->prio = prio;
+            thread->stackaddr = malloc(thread->memsize * sizeof(TVMMemorySize));
+            thread->id = threadList.size();
+            *tid = thread->id;
+            thread->sleepCountdown = 0;
+            threadList.push_back(*thread);
+            MachineResumeSignals(&signalState);
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadDelete(TVMThreadID thread) {
-                /* Deletes a DEAD thread
-                        Params:
-                                thread = thread ID
-                        Returns:
-                                VM_STATUS_SUCCESS on successful deletion
-                                VM_STATUS_ERROR_INVALID_ID on NULL thread param
-                                VM_STATUS_ERROR_INVALID_STATE on non-dead thread
-                */
-                MachineSuspendSignals(&signalState);
-                if (thread > threadHolder.size()-1 || thread < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_ID;
-                }
-                if (threadHolder[thread].state != VM_THREAD_STATE_DEAD) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_STATE;
-                }
-
-                delete &threadHolder[thread];
+            /* Deletes a DEAD thread
+                    Params:
+                            thread = thread ID
+                    Returns:
+                            VM_STATUS_SUCCESS on successful deletion
+                            VM_STATUS_ERROR_INVALID_ID on NULL thread param
+                            VM_STATUS_ERROR_INVALID_STATE on non-dead thread
+            */
+            MachineSuspendSignals(&signalState);
+            if (thread > threadList.size()-1 || thread < 0) {
                 MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_ID;
+            }
 
-                return VM_STATUS_SUCCESS;
+            if (threadList[thread].state != VM_THREAD_STATE_DEAD) {
+                MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_STATE;
+            }
+
+            delete &threadList[thread];
+            MachineResumeSignals(&signalState);
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadActivate(TVMThreadID thread) {
-                /* Activate DEAD thread
-                        Params:
-                                thread = dead thread ID
-                        Returns:
-                                VM_STATUS_SUCCESS on successful activation
-                                VM_STATUS_ERROR_INVALID_ID on NULL thread
-                                VM_STATUS_ERROR_INVALID_STATE on valid thread but not dead
-                */
-                MachineSuspendSignals(&signalState);
-                if (thread > threadHolder.size()-1 || thread < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_ID;
-                }
-
-                MachineContextCreate(&threadHolder[thread].cntx, &skeleton, threadHolder[thread].args, threadHolder[thread].stackaddr, threadHolder[thread].memsize);
-                threadHolder[thread].state = VM_THREAD_STATE_READY;
-                readyThreads[threadHolder[thread].prio-1].push(threadHolder[thread].id);
-                if (threadHolder[thread].prio > threadHolder[currThread].prio) {
-                        schedule(0);
-                }
+            /* Activate DEAD thread
+                    Params:
+                            thread = dead thread ID
+                    Returns:
+                            VM_STATUS_SUCCESS on successful activation
+                            VM_STATUS_ERROR_INVALID_ID on NULL thread
+                            VM_STATUS_ERROR_INVALID_STATE on valid thread but not dead
+            */
+            MachineSuspendSignals(&signalState);
+            if (thread > threadList.size()-1 || thread < 0) {
                 MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_ID;
+            }
 
-                return VM_STATUS_SUCCESS;
+            MachineContextCreate(&threadList[thread].cntx, &skeleton, threadList[thread].args,
+            	threadList[thread].stackaddr, threadList[thread].memsize);
+            
+            threadList[thread].state = VM_THREAD_STATE_READY;
+            readyThreads[threadList[thread].prio].push(threadList[thread].id);
+            if (threadList[thread].prio > threadList[currThread].prio) {
+                schedule(0);
+            }
+            MachineResumeSignals(&signalState);
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadTerminate(TVMThreadID thread) {
-                /* Terminate thread
-                        Params:
-                                thread = thread ID
-                        Returns:
-                                VM_STATUS_SUCCESS on successful termination
-                                VM_STATUS_ERROR_INVALID_ID on NULL thread
-                                VM_STATUS_ERROR_INVALID_STATE on valid dead thread
-                */
-                MachineSuspendSignals(&signalState);
-                if (thread > threadHolder.size()-1 || thread < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_ID;
-                }
-                if (threadHolder[thread].state == VM_THREAD_STATE_DEAD) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_STATE;
-                }
+            /* Terminate thread
+                    Params:
+                            thread = thread ID
+                    Returns:
+                            VM_STATUS_SUCCESS on successful termination
+                            VM_STATUS_ERROR_INVALID_ID on NULL thread
+                            VM_STATUS_ERROR_INVALID_STATE on valid dead thread
+            */
+            MachineSuspendSignals(&signalState);
 
-                threadHolder[thread].state = VM_THREAD_STATE_DEAD;
-                if (thread == currThread) {
-                        std::cout << "Terminating thread " << threadHolder[thread].id << std::endl;
-                        schedule(0);
-                }
-
+            if (thread > threadList.size()-1 || thread < 0) {
                 MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_ID;
+            }
 
-                return VM_STATUS_SUCCESS;
+            if (threadList[thread].state == VM_THREAD_STATE_DEAD) {
+                MachineResumeSignals(&signalState);
+               	return VM_STATUS_ERROR_INVALID_STATE;
+            }
+
+            threadList[thread].state = VM_THREAD_STATE_DEAD;
+            if (thread == currThread) {
+                // std::cout << "Terminating thread " << threadList[thread].id << std::endl;
+                schedule(0);
+            }
+
+            MachineResumeSignals(&signalState);
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadID(TVMThreadIDRef threadRef) {
-                /* Retrieve thread identifier of current operating thread
-                        Params:
-                                threadref = location to put thread ID
-                        Returns:
-                                VM_STATUS_SUCCESS on successful retrieval
-                                VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (threadRef == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-
-                *threadRef = currThread;
+            /* Retrieve thread identifier of current operating thread
+                    Params:
+                            threadref = location to put thread ID
+                    Returns:
+                            VM_STATUS_SUCCESS on successful retrieval
+                            VM_STATUS_ERROR_INVALID_PARAMETER if threadref = NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (threadRef == NULL) {
                 MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
 
-                return VM_STATUS_SUCCESS;
+            *threadRef = currThread;
+            MachineResumeSignals(&signalState);
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadState(TVMThreadID thread, TVMThreadStateRef stateref) {
-                /* Retrieves state of a thread in VM
-                        Params:
-                                thread = thread ID
-                                stateref = place to put thread state
-                        Returns:
-                                VM_STATUS_SUCCESS on successsful retrieval of state
-                                VM_STATUS_ERROR_INVALID_ID if thread does not exist
-                                VM_STATUS_ERROR_INVALID_PARAMETER on stateref = NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (stateref == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-
-                if (thread > threadHolder.size()-1 || thread < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_ID;
-                }
-
-                *stateref = threadHolder[thread].state;
+            /* Retrieves state of a thread in VM
+                    Params:
+                            thread = thread ID
+                            stateref = place to put thread state
+                    Returns:
+                            VM_STATUS_SUCCESS on successsful retrieval of state
+                            VM_STATUS_ERROR_INVALID_ID if thread does not exist
+                            VM_STATUS_ERROR_INVALID_PARAMETER on stateref = NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (stateref == NULL) {
                 MachineResumeSignals(&signalState);
-                return VM_STATUS_SUCCESS;
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
+
+            if (thread > threadList.size()-1 || thread < 0) {
+                MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_ID;
+            }
+
+            *stateref = threadList[thread].state;
+            MachineResumeSignals(&signalState);
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMThreadSleep(TVMTick tick) {
-                /* Put current thread in VM to sleep
-                        Params:
-                                tick = num of ticks to sleep for
-                                        If tick = VM_TIMEOUT_IMMEDIATE
-                                                current process yields remainder of proccessing quantum
-                                                to next ready process of equal prio
-                        Returns:
-                                VM_STATUS_SUCCESS on successful sleep
-                                VM_STATUS_ERROR_INVALID_PARAMETER if tick = VM_TIMEOUT_INFINITE
-                */
+            /* Put current thread in VM to sleep
+                    Params:
+                            tick = num of ticks to sleep for
+                                    If tick = VM_TIMEOUT_IMMEDIATE
+                                            current process yields remainder of proccessing quantum
+                                            to next ready process of equal prio
+                    Returns:
+                            VM_STATUS_SUCCESS on successful sleep
+                            VM_STATUS_ERROR_INVALID_PARAMETER if tick = VM_TIMEOUT_INFINITE
+            */
 
-                MachineSuspendSignals(&signalState);
-                if (tick == VM_TIMEOUT_INFINITE) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-                if (tick == VM_TIMEOUT_IMMEDIATE) {
-                        threadHolder[currThread].state = VM_THREAD_STATE_READY;
-                        readyThreads[threadHolder[currThread].prio-1].push(threadHolder[currThread].id);
-                        schedule(1);
-                } else {
-                        threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
-                        threadHolder[currThread].sleepCountdown = tick;
-                        sleepingThreads.push_back(threadHolder[currThread].id);
-                        schedule(0);
-                }
+            MachineSuspendSignals(&signalState);
+            if (tick == VM_TIMEOUT_INFINITE) {
                 MachineResumeSignals(&signalState);
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
 
-                return VM_STATUS_SUCCESS;
+            if (tick == VM_TIMEOUT_IMMEDIATE) {
+                threadList[currThread].state = VM_THREAD_STATE_READY;
+                readyThreads[threadList[currThread].prio].push(threadList[currThread].id);
+                schedule(1);
+            } else {
+                threadList[currThread].state = VM_THREAD_STATE_WAITING;
+                threadList[currThread].sleepCountdown = tick;
+                sleepingThreads.push_back(threadList[currThread].id);
+                schedule(0);
+            }
+            MachineResumeSignals(&signalState);
+
+            return VM_STATUS_SUCCESS;
         }
 
         void fileCallBack(void *calldata, int result) {
-                callBackDataStorage *args = (callBackDataStorage*) calldata;
-                *(args->resultPtr) = result;
+            callBackDataStorage *args = (callBackDataStorage*) calldata;
+            *(args->resultPtr) = result;
 
-                if (threadHolder[args->id].state == VM_THREAD_STATE_DEAD) {
-                        return;
-                } else {
-                        if (threadHolder[args->id].state > threadHolder[currThread].state) {
-                                threadHolder[currThread].state = VM_THREAD_STATE_READY;
-                                readyThreads[threadHolder[args->id].prio-1].push(args->id);
-                                schedule(0);
-                        }
+            if (threadList[args->id].state == VM_THREAD_STATE_DEAD) {
+                return;
+            } else {
+                if (threadList[args->id].state > threadList[currThread].state) {
+                    threadList[currThread].state = VM_THREAD_STATE_READY;
+                    threadList[args->id].state = VM_THREAD_STATE_READY;
+                    readyThreads[threadList[args->id].prio].push(args->id);
+                    std::cout << "fileCallBack: ";
+                    schedule(0);
                 }
+            }
         }
         TVMStatus VMFileOpen(const char* filename, int flags, int mode, int *fd) {
-                /* Open and possibly creates file in file system.
-                   Thread is in VM_THREAD_STATE_WAITING until success or failure of FileOpen
-                        Params:
-                                filename = file to open
-                                flags = flags to use
-                                mode = mode to use
-                                fd = file descriptor to use
-                        Returns:
-                                VM_STATUS_SUCCESS on successful open
-                                VM_STATUS_FAILURE on failure
-                                VM_STATUS_ERROR_INVALID_PARAMETER if fd or filename are NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (fd == NULL || filename == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;}
+            /* Open and possibly creates file in file system.
+               Thread is in VM_THREAD_STATE_WAITING until success or failure of FileOpen
+                    Params:
+                            filename = file to open
+                            flags = flags to use
+                            mode = mode to use
+                            fd = file descriptor to use
+                    Returns:
+                            VM_STATUS_SUCCESS on successful open
+                            VM_STATUS_FAILURE on failure
+                            VM_STATUS_ERROR_INVALID_PARAMETER if fd or filename are NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (fd == NULL || filename == NULL) {
+                    MachineResumeSignals(&signalState);
+                    return VM_STATUS_ERROR_INVALID_PARAMETER;}
 
-                threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+            threadList[currThread].state = VM_THREAD_STATE_WAITING;
 
-				callBackDataStorage *cb = new callBackDataStorage();
-				cb->id = currThread;
-				cb->resultPtr = fd;
+			callBackDataStorage *cb = new callBackDataStorage();
+			cb->id = currThread;
+			cb->resultPtr = fd;
 
-				MachineFileOpen(filename, flags, mode, &fileCallBack, cb);
-                schedule(0);
-                MachineResumeSignals(&signalState);
-                if (*fd < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_FAILURE;
-                }
+			MachineFileOpen(filename, flags, mode, &fileCallBack, cb);
+            schedule(0);
 
-                return VM_STATUS_SUCCESS;
+            MachineResumeSignals(&signalState);
+            if (*fd < 0) {
+                    MachineResumeSignals(&signalState);
+                    return VM_STATUS_FAILURE;
+            }
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMFileClose(int fd) {
-                /* Closes a file. VM_THREAD_STATE_WAITING until successful/unsuccessful close
-                        Params:
-                                fd = file descriptor
-                        Returns:
-                                VM_STATUS_SUCCESS on successful close
-                                VM_STATUS_FAILURE on failure
-                */
+            /* Closes a file. VM_THREAD_STATE_WAITING until successful/unsuccessful close
+                    Params:
+                            fd = file descriptor
+                    Returns:
+                            VM_STATUS_SUCCESS on successful close
+                            VM_STATUS_FAILURE on failure
+            */
 
-                MachineSuspendSignals(&signalState);
-                threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
-				int result;
-				callBackDataStorage *cb = new callBackDataStorage();
-				cb->id = currThread;
-				cb->resultPtr = (int*)&result;
-				MachineFileClose(fd, &fileCallBack, cb);
-                schedule(0);
+            MachineSuspendSignals(&signalState);
+            threadList[currThread].state = VM_THREAD_STATE_WAITING;
+			int result;
+			callBackDataStorage *cb = new callBackDataStorage();
+			cb->id = currThread;
+			cb->resultPtr = (int*)&result;
+			MachineFileClose(fd, &fileCallBack, cb);
+            schedule(0);
+            MachineResumeSignals(&signalState);
+
+            if (result < 0) {
                 MachineResumeSignals(&signalState);
-
-                if (result < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_FAILURE;
-                }
+                return VM_STATUS_FAILURE;
+            }
 
 
-                return VM_STATUS_SUCCESS;
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMFileRead(int fd, void* data, int* length) {
-                /* Read file. Thread is VM_THREAD_STATE_WAITING until success or failure
-                        Params:
-                                fd = file descriptor
-                                data = location where file data is stored
-                                length = number of bytes
-                        Returns:
-                                VM_STATUS_SUCCESS on success
-                                VM_STATUS_FAILURE on failure
-                                VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (data == NULL || length == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-
-                threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
-
-				callBackDataStorage *cb = new callBackDataStorage();;
-				cb->id = currThread;
-				cb->resultPtr = length;
-
-				MachineFileRead(fd, data, *length, &fileCallBack, cb);
-                schedule(0);
+            /* Read file. Thread is VM_THREAD_STATE_WAITING until success or failure
+                    Params:
+                            fd = file descriptor
+                            data = location where file data is stored
+                            length = number of bytes
+                    Returns:
+                            VM_STATUS_SUCCESS on success
+                            VM_STATUS_FAILURE on failure
+                            VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (data == NULL || length == NULL) {
                 MachineResumeSignals(&signalState);
-                if (*length < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_FAILURE;
-                }
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
 
-                return VM_STATUS_SUCCESS;
+            threadList[currThread].state = VM_THREAD_STATE_WAITING;
+
+			callBackDataStorage *cb = new callBackDataStorage();;
+			cb->id = currThread;
+			cb->resultPtr = length;
+
+			MachineFileRead(fd, data, *length, &fileCallBack, cb);
+            schedule(0);
+            MachineResumeSignals(&signalState);
+            if (*length < 0) {
+                MachineResumeSignals(&signalState);
+                return VM_STATUS_FAILURE;
+            }
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMFileWrite(int fd, void* data, int* length) {
-                /* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
-                        Params:
-                                fd = file descriptor
-                                data = location where file data is stored
-                                length = number of bytes
-                        Returns:
-                                VM_STATUS_SUCCESS on success
-                                VM_STATUS_FAILURE on failure
-                                VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
-                */
-                MachineSuspendSignals(&signalState);
-                if (data == NULL || length == NULL) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_ERROR_INVALID_PARAMETER;
-                }
-
-                threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
-
-				callBackDataStorage *cb = new callBackDataStorage();
-				cb->id = currThread;
-				cb->resultPtr = length;
-				MachineFileWrite(fd, data, *length, &fileCallBack, cb);
-                schedule(0);
+            /* Write to file. Thread is VM_THREAD_STATE_WAITING until success or failure
+                    Params:
+                            fd = file descriptor
+                            data = location where file data is stored
+                            length = number of bytes
+                    Returns:
+                            VM_STATUS_SUCCESS on success
+                            VM_STATUS_FAILURE on failure
+                            VM_STATUS_ERROR_INVALID_PARAMETER if data or length are NULL
+            */
+            MachineSuspendSignals(&signalState);
+            if (data == NULL || length == NULL) {
                 MachineResumeSignals(&signalState);
-                if (*length < 0) {
-                        MachineResumeSignals(&signalState);
-                        return VM_STATUS_FAILURE;
-                }
+                return VM_STATUS_ERROR_INVALID_PARAMETER;
+            }
 
-                return VM_STATUS_SUCCESS;
+            threadList[currThread].state = VM_THREAD_STATE_WAITING;
+
+			callBackDataStorage *cb = new callBackDataStorage();
+			cb->id = currThread;
+			cb->resultPtr = length;
+			MachineFileWrite(fd, data, *length, &fileCallBack, cb);
+            schedule(0);
+            MachineResumeSignals(&signalState);
+            if (*length < 0) {
+                MachineResumeSignals(&signalState);
+                return VM_STATUS_FAILURE;
+            }
+
+            return VM_STATUS_SUCCESS;
         }
 
         TVMStatus VMFileSeek(int fd, int offset, int whence, int* newoffset) {
-                /* Seeks within a file. VM_THREAD_STATE_WAITING until success or failure
-                        Params:
-                                fd = file descriptor, obtained by prev call to VMFileOpen()
-                                offset = numbers of bytes to seek
-                                whence = location to begin seeking
-                                newoffset = the location to place the new offset if not NULL
-                        Returns:
-                                VM_STATUS_SUCCESS on success
-                                VM_STATUS_FAILURE on failure
-                */
-                MachineSuspendSignals(&signalState);
-                int placeHolder = 0;
-                int* tempPointer = &placeHolder;
+            /* Seeks within a file. VM_THREAD_STATE_WAITING until success or failure
+                    Params:
+                            fd = file descriptor, obtained by prev call to VMFileOpen()
+                            offset = numbers of bytes to seek
+                            whence = location to begin seeking
+                            newoffset = the location to place the new offset if not NULL
+                    Returns:
+                            VM_STATUS_SUCCESS on success
+                            VM_STATUS_FAILURE on failure
+            */
+            MachineSuspendSignals(&signalState);
+            int placeHolder = 0;
+            int* tempPointer = &placeHolder;
 
-                threadHolder[currThread].state = VM_THREAD_STATE_WAITING;
+            threadList[currThread].state = VM_THREAD_STATE_WAITING;
 
-                callBackDataStorage *cb = new callBackDataStorage();
-				cb->id = currThread;
-				cb->resultPtr = tempPointer;
+            callBackDataStorage *cb = new callBackDataStorage();
+			cb->id = currThread;
+			cb->resultPtr = tempPointer;
 
-				MachineFileSeek(fd, offset, whence, &fileCallBack, cb);
-				schedule(0);
+			MachineFileSeek(fd, offset, whence, &fileCallBack, cb);
+			schedule(0);
 
-				if (newoffset != NULL) {
-					*newoffset = *tempPointer;
-					MachineResumeSignals(&signalState);
-					if (*newoffset < 0) {return VM_STATUS_FAILURE;}
-				}
-				else {
-					MachineResumeSignals(&signalState);
-					if (*tempPointer < 0) {return VM_STATUS_FAILURE;}
-				}
+			if (newoffset != NULL) {
+				*newoffset = *tempPointer;
+				MachineResumeSignals(&signalState);
+				if (*newoffset < 0) {return VM_STATUS_FAILURE;}
+			}
+			else {
+				MachineResumeSignals(&signalState);
+				if (*tempPointer < 0) {return VM_STATUS_FAILURE;}
+			}
 
-                return VM_STATUS_SUCCESS;
-        }
+            return VM_STATUS_SUCCESS;
+    	}
 
 
 }
