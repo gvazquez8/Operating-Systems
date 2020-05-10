@@ -3,6 +3,8 @@ Gabriel Vazquez
 917307919
 
 
+I did make clean before submitting.
+
 Instructions:
 
 1. extra tgz file
