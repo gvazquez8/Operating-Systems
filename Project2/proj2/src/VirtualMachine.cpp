@@ -456,10 +456,13 @@ extern "C" {
 			cb->resultPtr = length;
 			// std::cout << "Writing for thread: " << currThread << " now\n";
         	std::cout << "---------------\n";
-            for (unsigned int i = 1; i < readyThreads.size()-2; i++) {
+            for (unsigned int i = 1; i < readyThreads.size()-1; i++) {
             	switch(i) {
             		case 1:
             			std::cout << "LOW: ";	
+            			break;
+            		case 2:
+            			std::cout << "NORMAL: ";	
             			break;
             		default:
             			break;
