@@ -66,7 +66,7 @@ extern "C" {
             TVMThreadID prev = currThread;
             currThread = next;
 
-            // std::cout << "Going from " << prev << " to " << next << std::endl;
+            std::cout << "Going from " << prev << " to " << next << std::endl;
 
             if (threadList[prev].state == VM_THREAD_STATE_READY) {
                 readyThreads[threadList[prev].prio].push(threadList[prev].id);
@@ -201,7 +201,7 @@ extern "C" {
             if (VMMain == NULL) {return VM_STATUS_FAILURE;}
             
             // Set the global variable tickTime
-            tickTime = tickms+1;
+            tickTime = tickms;
 
             // Init the Machine
             MachineInitialize();
