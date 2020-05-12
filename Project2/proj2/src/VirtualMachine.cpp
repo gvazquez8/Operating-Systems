@@ -471,7 +471,7 @@ extern "C" {
             	for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
             		TVMThreadID tid = readyThreads[i].front();
             		readyThreads[i].pop();
-            		std::cout << tid << " ";
+            		std::cout << tid << "-";
             		readyThreads[i].push(tid);
             	}
             	std::cout << std::endl;
