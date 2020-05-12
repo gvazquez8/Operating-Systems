@@ -455,24 +455,24 @@ extern "C" {
 			cb->id = currThread;
 			cb->resultPtr = length;
 			// std::cout << "Writing for thread: " << currThread << " now\n";
-        	// std::cout << "---------------\n";
-         //    for (unsigned int i = 1; i < readyThreads.size()-2; i++) {
-         //    	switch(i) {
-         //    		case 1:
-         //    			std::cout << "LOW: ";	
-         //    			break;
-         //    		default:
-         //    			break;
-         //    	}
+        	std::cout << "---------------\n";
+            for (unsigned int i = 1; i < readyThreads.size()-2; i++) {
+            	switch(i) {
+            		case 1:
+            			std::cout << "LOW: ";	
+            			break;
+            		default:
+            			break;
+            	}
 
-         //    	for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
-         //    		TVMThreadID tid = readyThreads[i].front();
-         //    		readyThreads[i].pop();
-         //    		std::cout << tid << " ";
-         //    		readyThreads[i].push(tid);
-         //    	}
-         //    	std::cout << std::endl;
-         //    }
+            	for (unsigned int j = 0; j < readyThreads[i].size(); j++) {
+            		TVMThreadID tid = readyThreads[i].front();
+            		readyThreads[i].pop();
+            		std::cout << tid << " ";
+            		readyThreads[i].push(tid);
+            	}
+            	std::cout << std::endl;
+            }
 			MachineFileWrite(fd, data, *length, &fileCallBack, cb);
             // std::cout << "Scheduling through VMFileWrite\n";
             schedule(0);
